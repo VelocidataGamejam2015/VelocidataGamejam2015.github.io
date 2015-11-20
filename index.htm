@@ -44,7 +44,7 @@
           mouse_click_pending = true;
         }, false);
         
-        canvas.addEventListener("keypress", function (event)
+        canvas.addEventListener("keydown", function (event)
         {
           key_code = event.which;
           key_press_pending = true;
@@ -64,8 +64,11 @@
 
         scratches : [],
         countdown : 4,
-        text1 : "game goes here",
+        text : "game goes here",
+        default_text : "game goes here",
+        text1 : "w",
         second_countdown_timer : {active: true, period: 25, current: 0},
+        circle : {active: false, x: 0, y: 0},
         
         
         //-------------------------------------------------------------------
@@ -96,25 +99,23 @@
           this.second_countdown_timer.active = true;
           this.second_countdown_timer.current = 0;
           this.countdown = 4;
+          this.circle.active = false;
+          this.circle.x = 0;
+          this.circle.y = 0;
         },
       
         //-------------------------------------------------------------------
         handleMouseClick: function ()
         {
-          if (mouse_y >= 13 * cell_width &&
-            mouse_y <= 15 * cell_width &&
-            mouse_x >= 16 * cell_width &&
-            mouse_x <= 18 * cell_width)
-          {
-          }
+          this.circle.active = true;
+          this.circle.x = mouse_x;
+          this.circle.y = mouse_y;
         },
         
         //-------------------------------------------------------------------
         handleKeyPress: function ()
         {
-          if(key_code == 88)
-          {
-          }
+          this.text = key_code;
         },
 
         //-------------------------------------------------------------------
@@ -133,6 +134,13 @@
           ctx.lineWidth = 5;
           ctx.strokeStyle = "rgb(0, 0, 0)";
           ctx.fillStyle = "rgb(128, 128, 128)";
+          
+          if(this.circle.active)
+          {
+             ctx.beginPath();
+             ctx.arc(this.circle.x, this.circle.y, 20, 0, 2*Math.PI);
+             ctx.stroke();
+          }
           
           if(this.second_countdown_timer.active)
           {
@@ -188,7 +196,7 @@
           {
             ctx.fillStyle = "rgb(0,0,0)";
             ctx.font = "Bold 80px Arial";
-            ctx.fillText(this.text1, canvas_width/2, canvas_height/2);
+            ctx.fillText(this.text, canvas_width/2, canvas_height/2);
           }
           
           //finish jitter
