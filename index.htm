@@ -238,6 +238,8 @@
     var Monster = function (monster_type, grid_x, grid_y, layout)
     {
         this.m_type = monster_type;
+        this.m_commands = [];
+
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
         this.m_layout = layout;
@@ -272,6 +274,12 @@
         {
             return Util.isMouseClickInCell(
                 this.m_grid_x, this.m_grid_y, this.m_layout);
+        };
+
+        //----------------------------------------------------------------------
+        this.giveCommand = function(command)
+        {
+            this.m_commands.push(command);
         };
 
         //----------------------------------------------------------------------
@@ -382,6 +390,7 @@
     var MonsterInfoBox = function (layout)
     {
         this.m_visible = false;
+        this.m_active_monster = null;
         this.m_pos_x = 0;
         this.m_pos_y = 0;
         this.m_layout = layout;
@@ -404,6 +413,7 @@
         this.showNextToMonster = function(monster)
         {
             this.m_name = monster.m_name;
+            this.m_active_monster = monster;
 
             // try to the right of the monster
             this.m_pos_x = (monster.m_grid_x + 1) * this.m_layout.m_cell_size
@@ -479,8 +489,17 @@
                 this.m_pos_y + this.m_banner_height/2
             );
             this.m_blinker_age = (this.m_blinker_age + 1) % this.m_blinker_cycle;
-            this.paintline("> up", 1, false);
-            this.paintline("> right", 2, true);
+
+            var command_index;
+            for (command_index = 0;
+                command_index < this.m_active_monster.m_commands.length;
+                ++command_index)
+            {
+                this.paintline("> "
+                    + this.m_active_monster.m_commands[command_index].getText(),
+                    command_index + 1, false);
+            }
+            this.paintline(">", command_index + 1, true);
         };
     };
 
@@ -553,18 +572,24 @@
         };
 
         //----------------------------------------------------------------------
-        this.paint = function(x, y)
+        this.getText = function()
         {
             var text = "";
-            Util.forEach(this.m_steps, function(step) {
+            Util.forEach(this.m_steps, function (step)
+            {
                 text += step.m_char;
             });
+            return text;
+        };
 
+        //----------------------------------------------------------------------
+        this.paint = function(x, y)
+        {
             g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.font = "Bold 20px Arial";
             g_ctx.textAlign="start";
             g_ctx.textBaseline="middle";
-            g_ctx.fillText(text, x, y);
+            g_ctx.fillText(this.getText(), x, y);
         }
     };
 
@@ -572,12 +597,19 @@
     var CommandTray = function(layout)
     {
         this.m_commands = [];
+        this.m_shake = 0;
         this.m_layout = layout;
 
         //----------------------------------------------------------------------
-        this.push = function (monster_command)
+        this.enqueue = function (monster_command)
         {
             this.m_commands.push(monster_command);
+        };
+
+        //----------------------------------------------------------------------
+        this.dequeue = function ()
+        {
+            return this.m_commands.shift();
         };
 
         //----------------------------------------------------------------------
@@ -597,6 +629,12 @@
         };
 
         //----------------------------------------------------------------------
+        this.shake = function ()
+        {
+            this.m_shake = 3 * 2 * Math.PI;
+        };
+
+        //----------------------------------------------------------------------
         this.paint = function()
         {
             var layout = this.m_layout;
@@ -604,10 +642,23 @@
             var y_offset = layout.m_command_tray_y_offset
                 + GameConstants.m_command_tray_height / 2;
 
+            var shake_offset = 0;
+            if (this.m_shake > 0) {
+                shake_offset = Math.sin(this.m_shake) * 5;
+                x_offset += shake_offset;
+                this.m_shake -= Math.PI * 2 / 3;
+            }
+
             g_ctx.fillStyle = "rgb(0, 0, 0)";
             g_ctx.fillRect(
                 0, this.m_layout.m_command_tray_y_offset,
                 this.m_layout.m_canvas_width, GameConstants.m_command_tray_height);
+            g_ctx.strokeStyle = "rgb(255, 255, 255)";
+            g_ctx.strokeRect(
+                shake_offset + this.m_layout.m_grid_x_offset,
+                this.m_layout.m_command_tray_y_offset + 5,
+                this.m_layout.m_grid_size,
+                GameConstants.m_command_tray_height - 10);
 
             Util.forEach(this.m_commands, function(command) {
                command.paint(x_offset, y_offset);
@@ -673,6 +724,7 @@
         m_cities: null,
         m_monster_info_box: null,
         m_command_tray: null,
+        m_active_monster: null,
         m_layout: null,
 
         //----------------------------------------------------------------------
@@ -740,7 +792,7 @@
                     monster_command.push(
                         Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
                 }
-                this.m_command_tray.push(monster_command);
+                this.m_command_tray.enqueue(monster_command);
             }
         },
 
@@ -760,26 +812,41 @@
                 }
             });
 
-            if (null != clicked_monster)
+            if (null == this.m_active_monster && null != clicked_monster)
             {
                 this.m_monster_info_box.showNextToMonster(clicked_monster);
+                this.m_active_monster = clicked_monster;
             }
             else
             {
-                this.m_monster_info_box.hide()
+                this.m_monster_info_box.hide();
+                this.m_active_monster = null;
             }
         },
 
         //-------------------------------------------------------------------
         handleKeyPress: function ()
         {
-            if (65 == key_code)
+            if (65 == key_code) // a
             {
                 this.m_command_tray.rotate_left();
             }
-            else if (68 == key_code)
+            else if (68 == key_code) // d
             {
                 this.m_command_tray.rotate_right();
+            }
+            else if (83 == key_code) // s
+            {
+                if (null == this.m_active_monster
+                    || 0 == this.m_command_tray.m_commands.length)
+                {
+                    this.m_command_tray.shake();
+                }
+                else
+                {
+                    var command = this.m_command_tray.dequeue();
+                    this.m_active_monster.giveCommand(command);
+                }
             }
             //alert(key_code);
         },
