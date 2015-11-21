@@ -212,8 +212,12 @@
         this.paint = function ()
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
-            g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y
-                    * g_cell_size, g_cell_size, g_cell_size);
+            g_ctx.beginPath();
+            g_ctx.arc(
+                this.m_grid_x * g_cell_size + g_cell_size / 2,
+                this.m_grid_y * g_cell_size + g_cell_size / 2
+                , g_cell_size / 3, 0, 2 * Math.PI);
+            g_ctx.fill();
         };
     };
 
@@ -356,6 +360,10 @@
 
             Util.forEach(g_game_state.m_monsters, function(monster){
                 monster.paint();
+            });
+
+            Util.forEach(g_game_state.m_cities, function(city){
+                city.paint();
             })
         }
     };
