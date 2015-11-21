@@ -295,7 +295,11 @@
         this.m_pos_y = 0;
         this.m_width = Math.floor(g_cell_size * 3.75);
         this.m_height = Math.floor(g_cell_size * 1.75);
+        this.m_banner_height = Math.floor(this.m_height * .20);
+        this.m_text_height = Math.floor(this.m_banner_height * .60);
+        this.m_font = this.m_text_height + "px Arial";
         this.m_name = "Undefined";
+        this.m_blinker_age = 0;
 
         //----------------------------------------------------------------------
         this.hide = function()
@@ -329,6 +333,24 @@
         };
 
         //----------------------------------------------------------------------
+        this.paintline = function (text, line, lastline)
+        {
+            if(lastline && this.m_blinker_age > 10)
+            {
+                text += " _";
+            }
+            g_ctx.font=this.m_font;
+            g_ctx.textAlign="start";
+            g_ctx.textBaseline="middle";
+            g_ctx.fillStyle = "rgb(192,192,192)"
+            g_ctx.fillText(
+                    text,
+                    this.m_pos_x + 10,
+                    this.m_pos_y + this.m_banner_height*line + this.m_banner_height/2
+            );
+        };
+
+        //----------------------------------------------------------------------
         this.paint = function ()
         {
             if (!this.m_visible)
@@ -345,15 +367,22 @@
             g_ctx.fillStyle = "rgb(192,192,192)"
             g_ctx.fillRect(
                     this.m_pos_x, this.m_pos_y,
-                    this.m_width, g_cell_size/3);
+                    this.m_width, this.m_banner_height);
             g_ctx.fillStyle = "rgb(32,32,32)"
             g_ctx.strokeRect(
                     this.m_pos_x, this.m_pos_y,
                     this.m_width, this.m_height);
-            g_ctx.font="18px Arial";
+            g_ctx.font=this.m_font;
             g_ctx.textAlign="start";
             g_ctx.textBaseline="middle";
-            g_ctx.fillText(this.m_name,this.m_pos_x + 5,this.m_pos_y + g_cell_size/6);
+            g_ctx.fillText(
+                this.m_name,
+                this.m_pos_x + 5,
+                this.m_pos_y + this.m_banner_height/2
+            );
+            this.m_blinker_age = (this.m_blinker_age + 1) % 20;
+            this.paintline("> up", 1, false);
+            this.paintline("> right", 2, true);
         };
     };
 
