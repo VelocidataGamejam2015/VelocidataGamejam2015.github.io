@@ -104,25 +104,32 @@
     //--------------------------------------------------------------------------
     const MonsterTypes = {
         GLUTTONY: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/S_GluttonousTomato.png"
         },
         LUST: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/LustyCarrot.png"
         },
         GREED: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/RedMonster.png"
         },
         PRIDE: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/RedMonster.png"
         },
         WRATH: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/RedMonster.png"
         },
         ENVY: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/RedMonster.png"
         },
         SLOTH: {
-            m_fill_style: "rgb(255, 127, 0)"
+            m_fill_style: "rgb(255, 127, 0)",
+            m_image_source_file: "Assets/Monsters/RedMonster.png"
         }
     };
     const ALL_MONSTER_TYPES = [];
@@ -134,10 +141,11 @@
         this.m_type = monster_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
-        this.image = new Image();
-        this.ready = false;
-        this.image.src = "Assets/Monsters/RedMonster.png";
-        this.loop = 0;
+
+        this.m_image = new Image();
+        this.m_ready = false;
+        this.m_image.src = this.m_type.m_image_source_file;
+        this.m_loop = 0;
 
         //----------------------------------------------------------------------
         /** Returns true if the click was handled. */
@@ -152,19 +160,19 @@
 
         //----------------------------------------------------------------------
         this.paint = function () {
-            this.loop = (this.loop + 1) % 50;
-            var diff = this.loop / 5;
+            this.m_loop = (this.m_loop + 1) % 50;
+            var diff = this.m_loop / 5;
             if (diff > 5)
             {
                 diff = 10 - diff
             }
             g_ctx.drawImage
             (
-                    this.image,
-                    this.m_grid_x * g_cell_size + diff,
-                    this.m_grid_y * g_cell_size + diff,
-                    g_cell_size - diff * 2,
-                    g_cell_size - diff * 2
+                this.m_image,
+                this.m_grid_x * g_cell_size + diff,
+                this.m_grid_y * g_cell_size + diff,
+                g_cell_size - diff * 2,
+                g_cell_size - diff * 2
             );
 
             // g_ctx.fillStyle = this.m_type.m_fill_style;
@@ -561,7 +569,7 @@
     }
 
     // launch the game once the document is fully loaded
-    $(document).ready(init);
+    $(document).m_ready(init);
 
 </script>
 </body>
