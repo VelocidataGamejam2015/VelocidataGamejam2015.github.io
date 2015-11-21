@@ -560,18 +560,19 @@
                 + this.m_grid_x * this.m_layout.m_cell_size;
             var y_origin = this.m_layout.m_grid_y_offset
                 + this.m_grid_y * this.m_layout.m_cell_size;
+            var scale = this.m_layout.m_scale;
             g_ctx.drawImage(
                 CityUtil.m_background_image,
-                x_origin - GameConstants.m_city_origin_x_offset,
-                y_origin - GameConstants.m_city_origin_y_offset,
-                GameConstants.m_city_width,
-                GameConstants.m_city_height);
+                x_origin - GameConstants.m_city_origin_x_offset * scale,
+                y_origin - GameConstants.m_city_origin_y_offset * scale,
+                GameConstants.m_city_width * scale,
+                GameConstants.m_city_height * scale);
             g_ctx.drawImage(
                 this.m_type.m_overlay_image,
-                x_origin - GameConstants.m_city_origin_x_offset,
-                y_origin - GameConstants.m_city_origin_y_offset,
-                GameConstants.m_city_width,
-                GameConstants.m_city_height);
+                x_origin - GameConstants.m_city_origin_x_offset * scale,
+                y_origin - GameConstants.m_city_origin_y_offset * scale,
+                GameConstants.m_city_width * scale,
+                GameConstants.m_city_height * scale);
         };
     };
 
@@ -1123,6 +1124,7 @@
             = (layout.m_canvas_width - layout.m_grid_size) / 2;
         layout.m_grid_y_offset
             = (layout.m_command_tray_y_offset - layout.m_grid_size) / 2;
+        layout.m_scale = layout.m_cell_size / 100;
 
         g_canvas.addEventListener("mousedown", function (event) {
             var rect = g_canvas.getBoundingClientRect();
