@@ -147,6 +147,10 @@
         this.m_image.src = this.m_type.m_image_source_file;
         this.m_name = this.m_type.m_name;
         this.m_loop = 0;
+        this.m_asleep = true;
+        this.z_age = 0;
+        this.z_x = 0;
+        this.z_y = 0;
 
         //----------------------------------------------------------------------
         this.isClicked = function()
@@ -167,11 +171,44 @@
             (
                 this.m_image,
                 this.m_grid_x * g_cell_size + diff,
-                this.m_grid_y * g_cell_size + diff,
+                this.m_grid_y * g_cell_size + 2*diff,
                 g_cell_size - diff * 2,
                 g_cell_size - diff * 2
             );
-
+            if(this.m_asleep)
+            {
+                if(this.z_age == 0)
+                {
+                    this.z_x = this.m_grid_x * g_cell_size + (2 * g_cell_size / 3);
+                    this.z_y = this.m_grid_y * g_cell_size + (g_cell_size / 3);
+                }
+                if(this.z_age >= 30)
+                {
+                    if(Math.random()<.05)
+                    {
+                        this.z_age = -10;
+                    }
+                }
+                if(this.z_age>=60) {
+                    this.z_age = -10;
+                }
+                if(this.z_age >= 0)
+                {
+                    this.z_y = this.z_y - Math.random();
+                    this.z_x = this.z_x + 2*Math.random();
+                    g_ctx.font = "45px Arial";
+                    g_ctx.globalAlpha = 0.7;
+                    g_ctx.fillStyle = "rgb(192,192,192)";
+                    g_ctx.fillText
+                    (
+                        "Z",
+                        this.z_x,
+                        this.z_y
+                    );
+                    g_ctx.globalAlpha = 1;
+                }
+                this.z_age = this.z_age + 1;
+            }
             // g_ctx.fillStyle = this.m_type.m_fill_style;
             // g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size, g_cell_size, g_cell_size);
         };
