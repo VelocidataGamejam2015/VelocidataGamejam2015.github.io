@@ -98,31 +98,38 @@
     const MonsterTypes = {
         GLUTTONY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/S_GluttonousTomato.png"
+            m_image_source_file: "Assets/Monsters/S_GluttonousTomato.png",
+            m_name: "GluttonousTomato.txt"
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/LustyCarrot.png"
+            m_image_source_file: "Assets/Monsters/LustyCarrot.png",
+            m_name: "LustyCarrot.txt"
         },
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png"
+            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_name: "RedMonster.txt"
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png"
+            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_name: "RedMonster.txt"
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png"
+            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_name: "RedMonster.txt"
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png"
+            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_name: "RedMonster.txt"
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png"
+            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_name: "RedMonster.txt"
         }
     };
     const ALL_MONSTER_TYPES = [];
@@ -138,6 +145,7 @@
         this.m_image = new Image();
         this.m_ready = false;
         this.m_image.src = this.m_type.m_image_source_file;
+        this.m_name = this.m_type.m_name;
         this.m_loop = 0;
 
         //----------------------------------------------------------------------
@@ -213,6 +221,7 @@
         this.m_pos_y = 0;
         this.m_width = Math.floor(g_cell_size * 3.75);
         this.m_height = Math.floor(g_cell_size * 1.75);
+        this.m_name = "Undefined";
 
         //----------------------------------------------------------------------
         this.hide = function()
@@ -223,6 +232,7 @@
         //----------------------------------------------------------------------
         this.showNextToMonster = function(monster)
         {
+            this.m_name = monster.m_name;
             // try to the right of the monster
             this.m_pos_x = Math.floor((monster.m_grid_x + 1) * g_cell_size
                 + .125 * g_cell_size);
@@ -253,9 +263,23 @@
             }
 
             g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.globalAlpha=0.7;
             g_ctx.fillRect(
                 this.m_pos_x, this.m_pos_y,
                 this.m_width, this.m_height);
+            g_ctx.globalAlpha=1;
+            g_ctx.fillStyle = "rgb(192,192,192)"
+            g_ctx.fillRect(
+                    this.m_pos_x, this.m_pos_y,
+                    this.m_width, g_cell_size/3);
+            g_ctx.fillStyle = "rgb(32,32,32)"
+            g_ctx.strokeRect(
+                    this.m_pos_x, this.m_pos_y,
+                    this.m_width, this.m_height);
+            g_ctx.font="18px Arial";
+            g_ctx.textAlign="start";
+            g_ctx.textBaseline="middle";
+            g_ctx.fillText(this.m_name,this.m_pos_x + 5,this.m_pos_y + g_cell_size/6);
         };
     };
 
