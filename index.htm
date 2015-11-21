@@ -23,6 +23,7 @@
       var mouse_click_pending = false;
       var key_code = 0;
       var key_press_pending = false;
+      var grid_size = 10;
 
       //---------------------------------------------------------------------
       function init()
@@ -34,7 +35,7 @@
         canvas_height = $("#canvas").height();
 
         //Lets save the cell width in a variable for easy control
-        cell_width = canvas_height / 10;
+        cell_width = canvas_height / grid_size;
 
         canvas.addEventListener("mousedown", function (event)
         {
@@ -57,6 +58,17 @@
 
         // start processing events
         setTimeout(eventLoop, 40);
+      }
+      
+      var Monster = function(){
+         this.grid_x = 0;
+         this.grid_y = 0;
+         
+         this.draw = function() {
+            ctx.strokeStyle = "rgb(255, 0, 0)";
+            ctx.fillStyle = "rgb(255, 0, 0)";
+            canvas.fillRect(this.grid_x*cell_width, this.grid_y*cell_width, cell_width, cell_width);
+         }
       }
       
       //---------------------------------------------------------------------
