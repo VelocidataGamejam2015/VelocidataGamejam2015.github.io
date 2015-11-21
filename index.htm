@@ -31,6 +31,11 @@
         m_command_size: 3,
         m_command_tray_height: 100,
 
+        m_land_origin_x_offset: 100,
+        m_land_origin_y_offset: 100,
+        m_land_width: 200,
+        m_land_height: 200,
+
         m_city_origin_x_offset: 100,
         m_city_origin_y_offset: 100,
         m_city_width: 200,
@@ -209,19 +214,32 @@
     //--------------------------------------------------------------------------
     const LandTypes = {
         GRASS: {
-            m_fill_style: "rgb(0, 255, 0)"
+            m_fill_style: "rgb(0, 255, 0)",
+            m_image: Util.loadImage("Assets/Landscape/S_GrassTiled.png",
+                ResourceTracker)
         },
         DIRT: {
-            m_fill_style: "rgb(150, 75, 0)"
+            m_fill_style: "rgb(150, 75, 0)",
+            m_image: Util.loadImage("Assets/Landscape/S_Dirt.png",
+                ResourceTracker)
         },
-        TREES: {
-            m_fill_style: "rgb(0, 128, 0)"
+        DESERT: {
+            m_fill_style: "rgb(150, 75, 0)",
+            m_image: Util.loadImage("Assets/Landscape/S_DesertTiled.png",
+                ResourceTracker)
         },
-        ROCKS: {
-            m_fill_style: "rgb(128, 128, 128)"
+//        TREES: {
+//            m_fill_style: "rgb(0, 128, 0)"
+//        },
+        MOUNTAINS: {
+            m_fill_style: "rgb(128, 128, 128)",
+            m_image: Util.loadImage("Assets/Landscape/S_MountainsTiled.png",
+                ResourceTracker)
         },
         WATER: {
-            m_fill_style: "rgb(128, 128, 255)"
+            m_fill_style: "rgb(128, 128, 255)",
+            m_image: Util.loadImage("Assets/Landscape/S_WaterTiled.png",
+                ResourceTracker)
         }
     };
     const ALL_LAND_TYPES = [];
@@ -250,13 +268,17 @@
         // from GameObject
         this.paint = function ()
         {
-            g_ctx.fillStyle = this.m_type.m_fill_style;
-            g_ctx.fillRect(
-                this.m_layout.m_grid_x_offset
-                + this.m_grid_x * this.m_layout.m_cell_size,
-                this.m_layout.m_grid_y_offset
-                + this.m_grid_y * this.m_layout.m_cell_size,
-                this.m_layout.m_cell_size, this.m_layout.m_cell_size);
+            var x_origin = this.m_layout.m_grid_x_offset
+                + this.m_grid_x * this.m_layout.m_cell_size;
+            var y_origin = this.m_layout.m_grid_y_offset
+                + this.m_grid_y * this.m_layout.m_cell_size;
+            var scale = this.m_layout.m_scale;
+            g_ctx.drawImage(
+                this.m_type.m_image,
+                x_origin - GameConstants.m_land_origin_x_offset * scale,
+                y_origin - GameConstants.m_land_origin_y_offset * scale,
+                GameConstants.m_land_width * scale,
+                GameConstants.m_land_height * scale);
         };
     };
 
