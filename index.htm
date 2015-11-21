@@ -11,7 +11,7 @@
 <script>
     //##########################################################################
     // The game
-
+1
     var g_canvas;
     var g_ctx;
     var g_current_screen;
@@ -31,6 +31,7 @@
         m_command_size: 3,
         m_command_tray_height: 100,
         m_countdown_to_next_command_height: 10,
+        m_max_num_commands: 9,
 
         m_land_origin_x_offset: 100,
         m_land_origin_y_offset: 100,
@@ -886,12 +887,19 @@
             if (this.m_shake > 0) {
                 this.m_shake -= Math.PI * 2 / 3;
             }
-            this.m_countdown_to_next_command_progress += 1;
+            this.m_countdown_to_next_command_progress += 0.25;
 
             if (this.m_countdown_to_next_command_progress >= 100)
             {
-                this.m_countdown_to_next_command_progress = 0.0;
-                this.add_command();
+                if (this.m_commands.length >= GameConstants.m_max_num_commands)
+                {
+                    this.m_countdown_to_next_command_progress = 100.0;
+                }
+                else
+                {
+                    this.m_countdown_to_next_command_progress = 0.0;
+                    this.add_command();
+                }
             }
         };
 
