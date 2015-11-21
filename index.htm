@@ -747,7 +747,11 @@
         //----------------------------------------------------------------------
         // from GameObject
         this.handleTimeStep = function ()
-        {};
+        {
+            if (this.m_shake > 0) {
+                this.m_shake -= Math.PI * 2 / 3;
+            }
+        };
 
         //----------------------------------------------------------------------
         // from GameObject
@@ -762,7 +766,6 @@
             if (this.m_shake > 0) {
                 shake_offset = Math.sin(this.m_shake) * 5;
                 x_offset += shake_offset;
-                this.m_shake -= Math.PI * 2 / 3;
             }
 
             g_ctx.fillStyle = "rgb(0, 0, 0)";
