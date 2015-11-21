@@ -328,9 +328,9 @@
         this.m_real_width_offset
                 = (this.m_layout.m_cell_size - this.m_real_width) / 2;
 
-        this.m_loop = Math.floor(48 * Math.random());
+        this.m_breathing_loop = Math.floor(48 * Math.random());
         this.m_asleep = true;
-        this.z_age = 0;
+        this.z_age = -1;
         this.z_x = 0;
         this.z_y = 0;
 
@@ -351,33 +351,12 @@
         //----------------------------------------------------------------------
         // from GameObject
         this.handleTimeStep = function ()
-        {};
-
-        //----------------------------------------------------------------------
-        // from GameObject
-        this.paint = function ()
         {
-            this.m_loop = (this.m_loop + 1) % 48;
-            var diff = this.m_loop / 8;
-            if (diff > 3)
-            {
-                diff = 6 - diff
-            }
-            g_ctx.drawImage(
-                this.m_image,
-                this.m_layout.m_grid_x_offset
-                    + this.m_grid_x * this.m_layout.m_cell_size
-                    + diff
-                    + this.m_real_width_offset,
-                this.m_layout.m_grid_y_offset
-                    + this.m_grid_y * this.m_layout.m_cell_size
-                    + 2 * diff
-                    + this.m_real_height_offset,
-                this.m_real_width - diff * 2,
-                this.m_real_height - diff * 2
-            );
+            this.m_breathing_loop = (this.m_breathing_loop + 1) % 48;
+
             if (this.m_asleep)
             {
+                this.z_age = this.z_age + 1;
                 if (this.z_age == 0)
                 {
                     this.z_x = this.m_layout.m_grid_x_offset
@@ -402,17 +381,43 @@
                 {
                     this.z_y = this.z_y - Math.random();
                     this.z_x = this.z_x + 2 * Math.random();
-                    g_ctx.font = "45px Arial";
-                    g_ctx.globalAlpha = 0.7;
-                    g_ctx.fillStyle = "rgb(192,192,192)";
-                    g_ctx.fillText(
-                        "Z",
-                        this.z_x,
-                        this.z_y
-                    );
-                    g_ctx.globalAlpha = 1;
                 }
-                this.z_age = this.z_age + 1;
+            }
+        };
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.paint = function ()
+        {
+            var diff = this.m_breathing_loop / 8;
+            if (diff > 3)
+            {
+                diff = 6 - diff
+            }
+            g_ctx.drawImage(
+                this.m_image,
+                this.m_layout.m_grid_x_offset
+                    + this.m_grid_x * this.m_layout.m_cell_size
+                    + diff
+                    + this.m_real_width_offset,
+                this.m_layout.m_grid_y_offset
+                    + this.m_grid_y * this.m_layout.m_cell_size
+                    + 2 * diff
+                    + this.m_real_height_offset,
+                this.m_real_width - diff * 2,
+                this.m_real_height - diff * 2
+            );
+            if (this.m_asleep && this.z_age >= 0)
+            {
+                g_ctx.font = "45px Arial";
+                g_ctx.globalAlpha = 0.7;
+                g_ctx.fillStyle = "rgb(192,192,192)";
+                g_ctx.fillText(
+                    "Z",
+                    this.z_x,
+                    this.z_y
+                );
+                g_ctx.globalAlpha = 1;
             }
         };
     };
@@ -441,6 +446,17 @@
         this.m_layout = layout;
 
         //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
         this.paint = function ()
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
@@ -515,9 +531,9 @@
         };
 
         //----------------------------------------------------------------------
-        this.paintline = function (text, line, lastline)
+        this.paintline = function (text, line, is_last_line)
         {
-            if(lastline && this.m_blinker_age > this.m_blinker_cycle/2)
+            if (is_last_line && this.m_blinker_age > this.m_blinker_cycle / 2)
             {
                 text += " _";
             }
@@ -526,9 +542,10 @@
             g_ctx.textBaseline="middle";
             g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.fillText(
-                    text,
-                    this.m_pos_x + 10,
-                    this.m_pos_y + this.m_banner_height*line + this.m_banner_height/2
+                text,
+                this.m_pos_x + 10,
+                this.m_pos_y + this.m_banner_height * line
+                + this.m_banner_height / 2
             );
         };
 
@@ -540,7 +557,10 @@
         //----------------------------------------------------------------------
         // from GameObject
         this.handleTimeStep = function ()
-        {};
+        {
+            this.m_blinker_age
+                = (this.m_blinker_age + 1) % this.m_blinker_cycle;
+        };
 
         //----------------------------------------------------------------------
         // from GameObject
@@ -573,7 +593,6 @@
                 this.m_pos_x + 5,
                 this.m_pos_y + this.m_banner_height/2
             );
-            this.m_blinker_age = (this.m_blinker_age + 1) % this.m_blinker_cycle;
 
             var command_index;
             for (command_index = 0;
@@ -597,14 +616,14 @@
             m_dy: -1,
             m_rotate_left: "MOVE_LEFT",
             m_rotate_right: "MOVE_RIGHT",
-            m_char: "\u2191"
+            m_char: " \u2191 "
         },
         MOVE_DOWN: {
             m_dx: 1,
             m_dy: 0,
             m_rotate_left: "MOVE_RIGHT",
             m_rotate_right: "MOVE_LEFT",
-            m_char: "\u2193"
+            m_char: " \u2193 "
         },
         MOVE_LEFT: {
             m_dx: -1,
@@ -770,7 +789,7 @@
     //--------------------------------------------------------------------------
     // implements Screen
     var GameScreen = {
-        m_land: null,
+        m_lands: null,
         m_monsters: null,
         m_cities: null,
         m_monster_info_box: null,
@@ -787,15 +806,14 @@
             this.m_layout = layout;
 
             // initialize land
-            this.m_land = [];
+            this.m_lands = [];
             for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
             {
-                this.m_land[grid_x] = [];
                 for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
                 {
-                    this.m_land[grid_x][grid_y]
-                        = new Land(Util.randomItem(ALL_LAND_TYPES),
-                            grid_x, grid_y, layout);
+                    this.m_lands.push(
+                        new Land(Util.randomItem(ALL_LAND_TYPES),
+                            grid_x, grid_y, layout));
                 }
             }
 
@@ -808,9 +826,9 @@
             {
                 grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-                this.m_monsters[monster_index]
-                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES),
-                        grid_x, grid_y, layout);
+                this.m_monsters.push(
+                    new Monster(Util.randomItem(ALL_MONSTER_TYPES),
+                        grid_x, grid_y, layout));
             }
 
             // initialize cities
@@ -822,9 +840,9 @@
             {
                 grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-                this.m_cities[city_index]
-                    = new City(Util.randomItem(ALL_CITY_TYPES),
-                        grid_x, grid_y, layout);
+                this.m_cities.push(
+                    new City(Util.randomItem(ALL_CITY_TYPES),
+                        grid_x, grid_y, layout));
             }
 
             this.m_monster_info_box = new MonsterInfoBox(layout);
@@ -865,7 +883,9 @@
                 }
             });
 
-            if (null == this.m_active_monster && null != clicked_monster)
+            if (null != clicked_monster
+                && (null == this.m_active_monster
+                    || this.m_active_monster != clicked_monster))
             {
                 this.m_monster_info_box.showNextToMonster(clicked_monster);
                 this.m_active_monster = clicked_monster;
@@ -924,29 +944,38 @@
         //----------------------------------------------------------------------
         // from Screen
         handleTimeStep: function ()
-        {},
+        {
+            Util.forEach(this.m_lands, function(land){
+                land.handleTimeStep();
+            });
+
+            Util.forEach(this.m_monsters, function(monster){
+                monster.handleTimeStep();
+            });
+
+            Util.forEach(this.m_cities, function(city){
+                city.handleTimeStep();
+            });
+
+            this.m_monster_info_box.handleTimeStep();
+
+            this.m_command_tray.handleTimeStep();
+        },
 
         //-------------------------------------------------------------------
         // from Screen
         paint: function ()
         {
-            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
-
             // paint the background
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
             g_ctx.fillStyle = "rgb(0, 0, 0)";
             g_ctx.fillRect(
                 0, 0,
                 this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
 
-            // paint the land
-            var grid_x, grid_y;
-            for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
-            {
-                for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
-                {
-                    this.m_land[grid_x][grid_y].paint();
-                }
-            }
+            Util.forEach(this.m_lands, function(land){
+                land.paint();
+            });
 
             Util.forEach(this.m_monsters, function(monster){
                 monster.paint();
@@ -958,7 +987,6 @@
 
             this.m_monster_info_box.paint();
 
-            // paint the command tray
             this.m_command_tray.paint();
         }
     };
