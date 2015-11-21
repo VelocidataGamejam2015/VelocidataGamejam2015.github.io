@@ -12,7 +12,7 @@
     //##########################################################################
     // The game
 
-    window.setTimeout(endGame, 72000);
+    //window.setTimeout(endGame, 72000);
 
     function endGame() {
         alert('TIME UP ;(');
@@ -39,6 +39,7 @@
         m_countdown_to_next_command_height: 10,
         m_max_num_commands: 9,
         m_max_initial_placement_tries: 100,
+        m_top_space: 75,
 
         m_land_origin_x_offset: 100,
         m_land_origin_y_offset: 100,
@@ -1389,13 +1390,13 @@
         var cell_size_by_width
             = layout.m_canvas_width / GameConstants.m_grid_size;
         var cell_size_by_height
-            = layout.m_command_tray_y_offset / GameConstants.m_grid_size;
+            = (layout.m_command_tray_y_offset - GameConstants.m_top_space) / GameConstants.m_grid_size;
         layout.m_cell_size = Math.min(cell_size_by_width, cell_size_by_height);
         layout.m_grid_size = layout.m_cell_size * GameConstants.m_grid_size;
         layout.m_grid_x_offset
             = (layout.m_canvas_width - layout.m_grid_size) / 2;
         layout.m_grid_y_offset
-            = (layout.m_command_tray_y_offset - layout.m_grid_size) / 2;
+            = (layout.m_command_tray_y_offset - layout.m_grid_size);
         layout.m_scale = layout.m_cell_size / 100;
 
         g_canvas.addEventListener("mousedown", function (event) {
