@@ -32,6 +32,29 @@
     };
 
     //--------------------------------------------------------------------------
+    const Util = {
+        forEach: function (obj, fn)
+        {
+            var key;
+            for (key in obj)
+            {
+                if (obj.hasOwnProperty(key))
+                {
+                    fn(obj[key]);
+                }
+            }
+        },
+
+        randomItem: function (arr)
+        {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+    };
+    //--------------------------------------------------------------------------
+
+    //##########################################################################
+
+    //--------------------------------------------------------------------------
     const LandTypes = {
         GRASS: {
             m_fill_style: "rgb(0, 255, 0)"
@@ -49,6 +72,8 @@
             m_fill_style: "rgb(128, 128, 255)"
         }
     };
+    const ALL_LAND_TYPES = [];
+    Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     var Land = function (land_type, grid_x, grid_y)
@@ -69,28 +94,46 @@
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
             g_ctx.fillRect(
-                this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
-                g_cell_size, g_cell_size);
+                    this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
+                    g_cell_size, g_cell_size);
         };
     };
 
-    //--------------------------------------------------------------------------
-    const MonsterTypes = {
-        GLUTTONY: {},
-        LUST: {},
-        GREED: {},
-        PRIDE: {},
-        WRATH: {},
-        ENVY: {},
-        SLOTH: {}
-    };
+    //##########################################################################
 
     //--------------------------------------------------------------------------
-    var Monster = function (monster_type) {
+    const MonsterTypes = {
+        GLUTTONY: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        LUST: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        GREED: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        PRIDE: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        WRATH: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        ENVY: {
+            m_fill_style: "rgb(255, 127, 0)"
+        },
+        SLOTH: {
+            m_fill_style: "rgb(255, 127, 0)"
+        }
+    };
+    const ALL_MONSTER_TYPES = [];
+    Util.forEach(MonsterTypes, function(item) { ALL_MONSTER_TYPES.push(item); } );
+
+    //--------------------------------------------------------------------------
+    var Monster = function (monster_type, grid_x, grid_y)
+    {
         this.m_type = monster_type;
-        this.m_grid_x = 0;
-        this.m_grid_y = 0;
-        this.m_state = 0;
+        this.m_grid_x = grid_x;
+        this.m_grid_y = grid_y;
         this.image = new Image();
         this.ready = false;
         this.image.src = "Assets/Monsters/RedMonster.png";
@@ -117,24 +160,53 @@
             }
             g_ctx.drawImage
             (
-                this.image,
-                this.m_grid_x * g_cell_size + diff,
-                this.m_grid_y * g_cell_size + diff,
-                g_cell_size - diff * 2,
-                g_cell_size - diff * 2
+                    this.image,
+                    this.m_grid_x * g_cell_size + diff,
+                    this.m_grid_y * g_cell_size + diff,
+                    g_cell_size - diff * 2,
+                    g_cell_size - diff * 2
             );
+        };
+    };
+
+    //##########################################################################
+
+    //--------------------------------------------------------------------------
+    const CityTypes = {
+        BLUE: {
+            m_fill_style: "rgb(100, 100, 255)"
+        },
+        RED: {
+            m_fill_style: "rgb(255, 100, 100)"
+        }
+    };
+    const ALL_CITY_TYPES = [];
+    Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
+
+    //--------------------------------------------------------------------------
+    var City = function (city_type, grid_x, grid_y)
+    {
+        this.m_type = city_type;
+        this.m_grid_x = grid_x;
+        this.m_grid_y = grid_y;
+
+        //----------------------------------------------------------------------
+        /** Returns true if the click was handled. */
+        this.handleMouseClick = function ()
+        {
+            return false;
         };
 
         //----------------------------------------------------------------------
-        this.setStyle = function() {
-            g_ctx.strokeStyle = "rgb(255, 0, 0)";
-            if (this.m_state) {
-                g_ctx.fillStyle = "rgb(0, 255, 0)";
-            } else {
-                g_ctx.fillStyle = "rgb(255, 0, 0)";
-            }
-        }
+        this.paint = function ()
+        {
+            g_ctx.fillStyle = this.m_type.m_fill_style;
+            g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y
+                    * g_cell_size, g_cell_size, g_cell_size);
+        };
     };
+
+    //##########################################################################
 
     var g_game_state;
 
@@ -151,22 +223,39 @@
             g_game_state.m_land[grid_x] = [];
             for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
             {
-                g_game_state.m_land[grid_x][grid_y] = LandTypes.GRASS;
+                g_game_state.m_land[grid_x][grid_y]
+                        = new Land(Util.randomItem(ALL_LAND_TYPES), grid_x, grid_y);
             }
         }
 
         // initialize monsters
+        g_game_state.m_monsters = [];
         var monster_index;
         for (monster_index = 0;
-            monster_index < GameConstants.m_initial_monsters;
-            ++monster_index)
+             monster_index < GameConstants.m_initial_monsters;
+             ++monster_index)
         {
+            grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+            grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
             g_game_state.m_monsters[monster_index]
-                = new Monster(MonsterTypes.ENVY)
+                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
         }
 
         // initialize cities
+        g_game_state.m_cities = [];
+        var city_index;
+        for (city_index = 0;
+             city_index < GameConstants.m_initial_cities;
+             ++city_index)
+        {
+            grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+            grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+            g_game_state.m_cities[city_index]
+                    = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
+        }
     }
+
+    //##########################################################################
 
     //--------------------------------------------------------------------------
     function init() {
@@ -175,6 +264,8 @@
         g_ctx = canvas.getContext("2d");
         canvas_width = $("#canvas").width();
         canvas_height = $("#canvas").height();
+        g_ctx.textAlign = "center";
+        g_ctx.textBaseline = "middle";
 
         //Lets save the cell width in a variable for easy control
         g_cell_size = canvas_height / GameConstants.m_grid_size;
@@ -192,9 +283,9 @@
         }, false);
 
         //can't do this until you've set up canvas_width and canvas_height
-        TitleScreen.init();
-        TitleScreen.reset();
-        current_screen = TitleScreen;
+        GameScreen.init();
+        GameScreen.reset();
+        current_screen = GameScreen;
 
         // start processing events
         setTimeout(eventLoop, 40);
@@ -203,14 +294,55 @@
     //--------------------------------------------------------------------------
     var isMouseClickInCell = function (grid_x, grid_y) {
         return (mouse_x >= grid_x * g_cell_size
-            && mouse_x < (grid_x + 1) * g_cell_size
-            && mouse_y >= grid_y * g_cell_size
-            && mouse_y < (grid_y +1) * g_cell_size);
+        && mouse_x < (grid_x + 1) * g_cell_size
+        && mouse_y >= grid_y * g_cell_size
+        && mouse_y < (grid_y +1) * g_cell_size);
     };
 
-
+    //--------------------------------------------------------------------------
     var GameScreen = {
 
+        //----------------------------------------------------------------------
+        init: function ()
+        {
+            initGameState()
+        },
+
+        //-------------------------------------------------------------------
+        reset: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        handleMouseClick: function ()
+        {
+
+//            for (m in this.monsters)
+//            {
+//                this.monsters[m].handleMouseClick();
+//            }
+        },
+
+        //-------------------------------------------------------------------
+        handleKeyPress: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        paint: function ()
+        {
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            // paint the land
+            var grid_x, grid_y;
+            for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
+            {
+                for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
+                {
+                    g_game_state.m_land[grid_x][grid_y].paint();
+                }
+            }
+        }
     };
 
     //--------------------------------------------------------------------------
@@ -230,7 +362,7 @@
         init: function () {
             this.scratches.push({x_top: 30, x_stray: -5, age: 0, active: 100, period: 170});
             this.scratches.push({x_top: 120, x_stray: 5, age: 0, active: 150, period: 190});
-            this.monsters.push(new Monster());
+            this.monsters.push(new Monster(MonsterTypes.ENVY, 1, 1));
             g_ctx.textAlign = "center";
             g_ctx.textBaseline = "middle";
 
