@@ -833,8 +833,16 @@
         this.m_countdown_to_next_command_progress = 0.0;
 
         //----------------------------------------------------------------------
-        this.enqueue = function (monster_command)
+        this.add_command = function ()
         {
+            var monster_command = new MonsterCommand();
+            for (step_index = 0;
+                 step_index < GameConstants.m_command_size;
+                 ++step_index)
+            {
+                monster_command.push(
+                        Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
+            }
             this.m_commands.push(monster_command);
         };
 
@@ -883,6 +891,7 @@
             if (this.m_countdown_to_next_command_progress >= 100)
             {
                 this.m_countdown_to_next_command_progress = 0.0;
+                this.add_command();
             }
         };
 
@@ -953,13 +962,14 @@
             // initialize land
             var grid_x, grid_y;
             this.m_lands = [];
+            var layout = this.m_layout;
             for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
             {
                 for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
                 {
                     this.m_lands.push(
                         new Land(Util.randomItem(ALL_LAND_TYPES),
-                            grid_x, grid_y, this.m_layout));
+                            grid_x, grid_y, layout));
                 }
             }
 
@@ -974,7 +984,7 @@
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_monsters.push(
                     new Monster(Util.randomItem(ALL_MONSTER_TYPES),
-                        grid_x, grid_y, this.m_layout));
+                        grid_x, grid_y, layout));
             }
 
             // initialize cities
@@ -988,27 +998,19 @@
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_cities.push(
                     new City(Util.randomItem(ALL_CITY_TYPES),
-                        grid_x, grid_y, this.m_layout));
+                        grid_x, grid_y, layout));
             }
 
-            this.m_monster_info_box = new MonsterInfoBox(this.m_layout);
+            this.m_monster_info_box = new MonsterInfoBox(layout);
 
             // initialize commands
-            this.m_command_tray = new CommandTray(this.m_layout);
+            this.m_command_tray = new CommandTray(layout);
             var command_index, step_index;
             for (command_index = 0;
                 command_index < GameConstants.m_initial_commands;
                 ++command_index)
             {
-                var monster_command = new MonsterCommand();
-                for (step_index = 0;
-                    step_index < GameConstants.m_command_size;
-                    ++step_index)
-                {
-                    monster_command.push(
-                        Util.randomItem(ALL_MONSTER_STEP_TYPES), this.m_layout);
-                }
-                this.m_command_tray.enqueue(monster_command);
+                this.m_command_tray.add_command();
             }
         },
 
