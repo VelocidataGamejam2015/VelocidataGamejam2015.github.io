@@ -512,12 +512,13 @@
 
                         var monster=this;
                         var city_index;
-                        for(city_index==0; city_index < GameScreen.m_cities.length; city_index++)
+                        for(city_index=0; city_index < GameScreen.m_cities.length; city_index++)
                         {
-                            var city = GameScreen.m_cities[cityindex]
+                            var city = GameScreen.m_cities[city_index];
                             if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
                                 // monster eats the city - Remove the city from the screen
-                                GameScreen.m_cities.remove(cityindex,1)
+                                GameScreen.m_cities.splice(city_index, 1);
+                                break;
                             }
                         }
                     }
