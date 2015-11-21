@@ -25,13 +25,14 @@
     //--------------------------------------------------------------------------
     const GameConstants = {
         m_grid_size: 10,
-        m_initial_monsters: 2,
-        m_initial_cities: 3,
+        m_initial_monsters: 5,
+        m_initial_cities: 5,
         m_initial_commands: 3,
         m_command_size: 3,
         m_command_tray_height: 100,
         m_countdown_to_next_command_height: 10,
         m_max_num_commands: 9,
+        m_max_initial_placement_tries: 100,
 
         m_land_origin_x_offset: 100,
         m_land_origin_y_offset: 100,
@@ -513,7 +514,7 @@
                         var city_index;
                         for(city_index==0; city_index < GameScreen.m_cities.length; city_index++)
                         {
-                            var city = Gamescreen.m_cities[cityindex]
+                            var city = GameScreen.m_cities[cityindex]
                             if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
                                 // monster eats the city - Remove the city from the screen
                                 GameScreen.m_cities.remove(cityindex,1)
@@ -1017,6 +1018,34 @@
         m_layout: null,
 
         //----------------------------------------------------------------------
+        containsCity: function (grid_x, grid_y)
+        {
+            var index;
+            for (index=0; index < this.m_cities.length; ++index)
+            {
+                if (this.m_cities[index].m_grid_x == grid_x && this.m_cities[index].m_grid_y == grid_y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        //----------------------------------------------------------------------
+        containsMonster: function (grid_x, grid_y)
+        {
+            var index;
+            for (index=0; index < this.m_monsters.length; ++index)
+            {
+                if (this.m_monsters[index].m_grid_x == grid_x && this.m_monsters[index].m_grid_y == grid_y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        //----------------------------------------------------------------------
         // from Screen
         init: function (layout)
         {
@@ -1041,6 +1070,36 @@
                 }
             }
 
+            // initialize cities
+            this.m_cities = [];
+            var city_index;
+            for (city_index = 0;
+                 city_index < GameConstants.m_initial_cities;
+                 ++city_index)
+            {
+                var tries = 0;
+                while (true)
+                {
+                    grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+                    grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+                    if (!this.containsCity(grid_x, grid_y))
+                    {
+                        break;
+                    }
+                    tries += 1;
+                    if (tries == GameConstants.m_max_initial_placement_tries)
+                    {
+                        break;
+                    }
+                }
+                if (tries < GameConstants.m_max_initial_placement_tries)
+                {
+                    this.m_cities.push(
+                        new City(Util.randomItem(ALL_CITY_TYPES),
+                            grid_x, grid_y, layout));
+                }
+            }
+
             // initialize monsters
             this.m_monsters = [];
             var monster_index;
@@ -1048,25 +1107,27 @@
                 monster_index < GameConstants.m_initial_monsters;
                 ++monster_index)
             {
-                grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-                grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-                this.m_monsters.push(
-                    new Monster(Util.randomItem(ALL_MONSTER_TYPES),
-                        grid_x, grid_y, layout));
-            }
-
-            // initialize cities
-            this.m_cities = [];
-            var city_index;
-            for (city_index = 0;
-                city_index < GameConstants.m_initial_cities;
-                ++city_index)
-            {
-                grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-                grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-                this.m_cities.push(
-                    new City(Util.randomItem(ALL_CITY_TYPES),
-                        grid_x, grid_y, layout));
+                var tries = 0;
+                while (true)
+                {
+                    grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+                    grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+                    if (!this.containsCity(grid_x, grid_y) && !this.containsMonster(grid_x, grid_y))
+                    {
+                        break;
+                    }
+                    tries += 1;
+                    if (tries == GameConstants.m_max_initial_placement_tries)
+                    {
+                        break;
+                    }
+                }
+                if (tries < GameConstants.m_max_initial_placement_tries)
+                {
+                    this.m_monsters.push(
+                        new Monster(Util.randomItem(ALL_MONSTER_TYPES),
+                            grid_x, grid_y, layout));
+                }
             }
 
             this.m_monster_info_box = new MonsterInfoBox(layout);
