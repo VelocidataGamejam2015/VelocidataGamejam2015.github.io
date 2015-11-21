@@ -30,6 +30,7 @@
         m_initial_commands: 3,
         m_command_size: 3,
         m_command_tray_height: 100,
+        m_countdown_to_next_command_height: 10,
 
         m_land_origin_x_offset: 100,
         m_land_origin_y_offset: 100,
@@ -829,6 +830,7 @@
         this.m_commands = [];
         this.m_shake = 0;
         this.m_layout = layout;
+        this.m_countdown_to_next_command_progress = 0.0;
 
         //----------------------------------------------------------------------
         this.enqueue = function (monster_command)
@@ -876,6 +878,12 @@
             if (this.m_shake > 0) {
                 this.m_shake -= Math.PI * 2 / 3;
             }
+            this.m_countdown_to_next_command_progress += 1;
+
+            if (this.m_countdown_to_next_command_progress >= 100)
+            {
+                this.m_countdown_to_next_command_progress = 0.0;
+            }
         };
 
         //----------------------------------------------------------------------
@@ -885,7 +893,7 @@
             var layout = this.m_layout;
             var x_offset = layout.m_grid_x_offset + layout.m_cell_size / 2;
             var y_offset = layout.m_command_tray_y_offset
-                + GameConstants.m_command_tray_height / 2;
+                + (GameConstants.m_command_tray_height - GameConstants.m_countdown_to_next_command_height) / 2;
 
             var shake_offset = 0;
             if (this.m_shake > 0) {
@@ -903,6 +911,13 @@
                 this.m_layout.m_command_tray_y_offset + 5,
                 this.m_layout.m_grid_size,
                 GameConstants.m_command_tray_height - 10);
+
+            g_ctx.fillStyle = "rgb(32, 192, 32)";
+            g_ctx.fillRect(
+                shake_offset + this.m_layout.m_grid_x_offset,
+                this.m_layout.m_countdown_to_next_command_offset_y + 6,
+                this.m_layout.m_grid_size * this.m_countdown_to_next_command_progress / 100.0,
+                GameConstants.m_countdown_to_next_command_height);
 
             Util.forEach(this.m_commands, function(command) {
                command.paint(x_offset, y_offset);
@@ -1134,6 +1149,9 @@
         layout.m_canvas_height = canvas_obj.height();
         layout.m_command_tray_y_offset
             = layout.m_canvas_height - GameConstants.m_command_tray_height;
+        layout.m_countdown_to_next_command_offset_y
+            = layout.m_canvas_height -
+                GameConstants.m_countdown_to_next_command_height - 10;
 
         var cell_size_by_width
             = layout.m_canvas_width / GameConstants.m_grid_size;
@@ -1201,7 +1219,6 @@
         else {
             setTimeout(eventLoop, 40 - comp_time);
         }
-
     }
 
     // launch the game once the document is fully loaded
