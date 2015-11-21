@@ -14,7 +14,7 @@
 
     var g_canvas;
     var g_ctx;
-    var current_screen;
+    var g_current_screen;
 
     var mouse_x = 0;
     var mouse_y = 0;
@@ -30,6 +30,25 @@
         m_initial_commands: 3,
         m_command_size: 3,
         m_command_tray_height: 100
+    };
+
+    //--------------------------------------------------------------------------
+    // interface, for reference, not enforced
+    const GameObject = {
+        isClicked: function () {},
+        handleTimeStep: function () {},
+        paint: function () {}
+    };
+
+    //--------------------------------------------------------------------------
+    // interface, for reference, not enforced
+    const Screen_ = { // Screen is already declared and this is for reference anyway
+        init: function (layout) {},
+        reset: function () {},
+        handleMouseClick: function () {},
+        handleKeyPress: function () {},
+        handleTimeStep: function () {},
+        paint: function () {}
     };
 
     //--------------------------------------------------------------------------
@@ -81,12 +100,14 @@
             var audio = new buzz.sound(
               url, {
               //formats: [ "wav" ],
-              preload: false,
+              preload: true,
               autoplay: false,
               loop: false
-            });;
+            });
             resource_tracker.add();
-            audio.bindOnce("loadeddata", resource_tracker.onload(null));
+            audio.bindOnce("canplay", function(event) {
+                resource_tracker.onload(event)
+            });
             return audio;
         }
     };
@@ -115,6 +136,7 @@
     Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
+    // implements GameObject
     var Land = function (land_type, grid_x, grid_y, layout)
     {
         this.m_type = land_type;
@@ -123,6 +145,17 @@
         this.m_layout = layout;
 
         //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
         this.paint = function ()
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
@@ -137,34 +170,42 @@
 
     //##########################################################################
 
+    //--------------------------------------------------------------------------
     var ResourceTracker = {
-        m_added: 1, //I track myself loading
+        m_added: 1, // I track myself loading
         m_loaded: 0,
         m_layout: null,
 
         //----------------------------------------------------------------------
+        // from Screen
         init: function (layout)
         {
             this.m_layout = layout;
             this.onload(null); //and here I'm loaded
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // from Screen
         reset: function ()
-        {
-        },
+        {},
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // from Screen
         handleMouseClick: function ()
-        {
-        },
+        {},
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // from Screen
         handleKeyPress: function ()
-        {
-        },
+        {},
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // from Screen
+        handleTimeStep: function ()
+        {},
+
+        //----------------------------------------------------------------------
+        // from Screen
         paint: function ()
         {
             g_ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -188,10 +229,13 @@
         },
 
 
+        //----------------------------------------------------------------------
         add: function() {
             ++this.m_added;
         },
 
+        //----------------------------------------------------------------------
+        // from Image.onload
         onload: function (event) {
             ++this.m_loaded;
             if (this.m_loaded == this.m_added)
@@ -200,16 +244,18 @@
             }
         },
 
+        //----------------------------------------------------------------------
         onAllLoaded: function() {
-            GameScreen.init(this.m_layout);
-            GameScreen.reset();
-            current_screen = GameScreen;
+            switchToScreen(GameScreen);
         }
     };
 
+    //--------------------------------------------------------------------------
     var AudioComponents = {
-        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker),
+        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker)
     };
+
+    //##########################################################################
 
     //--------------------------------------------------------------------------
     const MonsterTypes = {
@@ -253,6 +299,7 @@
     Util.forEach(MonsterTypes, function(item) { ALL_MONSTER_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
+    // implements GameObject
     var Monster = function (monster_type, grid_x, grid_y, layout)
     {
         this.m_type = monster_type;
@@ -288,6 +335,13 @@
         this.z_y = 0;
 
         //----------------------------------------------------------------------
+        this.giveCommand = function(command)
+        {
+            this.m_commands.push(command);
+        };
+
+        //----------------------------------------------------------------------
+        // from GameObject
         this.isClicked = function()
         {
             return Util.isMouseClickInCell(
@@ -295,12 +349,12 @@
         };
 
         //----------------------------------------------------------------------
-        this.giveCommand = function(command)
-        {
-            this.m_commands.push(command);
-        };
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
 
         //----------------------------------------------------------------------
+        // from GameObject
         this.paint = function ()
         {
             this.m_loop = (this.m_loop + 1) % 48;
@@ -378,6 +432,7 @@
     Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
+    // implements GameObject
     var City = function (city_type, grid_x, grid_y, layout)
     {
         this.m_type = city_type;
@@ -405,6 +460,7 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
+    // implements GameObject
     var MonsterInfoBox = function (layout)
     {
         this.m_visible = false;
@@ -477,6 +533,17 @@
         };
 
         //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
         this.paint = function ()
         {
             if (!this.m_visible)
@@ -612,6 +679,7 @@
     };
 
     //--------------------------------------------------------------------------
+    // implements GameObject
     var CommandTray = function(layout)
     {
         this.m_commands = [];
@@ -653,6 +721,17 @@
         };
 
         //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
         this.paint = function()
         {
             var layout = this.m_layout;
@@ -689,53 +768,7 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
-    function init() {
-        //Canvas stuff
-        var canvas_obj = $("#canvas");
-        g_canvas = canvas_obj[0];
-        g_ctx = g_canvas.getContext("2d");
-        g_ctx.textAlign="start";
-        g_ctx.textBaseline="middle";
-
-        var layout = {};
-        layout.m_canvas_width = canvas_obj.width();
-        layout.m_canvas_height = canvas_obj.height();
-        layout.m_command_tray_y_offset
-            = layout.m_canvas_height - GameConstants.m_command_tray_height;
-
-        var cell_size_by_width
-            = layout.m_canvas_width / GameConstants.m_grid_size;
-        var cell_size_by_height
-            = layout.m_command_tray_y_offset / GameConstants.m_grid_size;
-        layout.m_cell_size = Math.min(cell_size_by_width, cell_size_by_height);
-        layout.m_grid_size = layout.m_cell_size * GameConstants.m_grid_size;
-        layout.m_grid_x_offset
-            = (layout.m_canvas_width - layout.m_grid_size) / 2;
-        layout.m_grid_y_offset
-            = (layout.m_command_tray_y_offset - layout.m_grid_size) / 2;
-
-        g_canvas.addEventListener("mousedown", function (event) {
-            var rect = g_canvas.getBoundingClientRect();
-            mouse_x = event.clientX - rect.left;
-            mouse_y = event.clientY - rect.top;
-            mouse_click_pending = true;
-        }, false);
-
-        g_canvas.addEventListener("keydown", function (event) {
-            key_code = event.which;
-            key_press_pending = true;
-        }, false);
-
-        //can't do this until you've set up canvas_width and canvas_height
-        ResourceTracker.init(layout);
-        ResourceTracker.reset();
-        current_screen = ResourceTracker;
-
-        // start processing events
-        setTimeout(eventLoop, 40);
-    }
-
-    //--------------------------------------------------------------------------
+    // implements Screen
     var GameScreen = {
         m_land: null,
         m_monsters: null,
@@ -746,6 +779,7 @@
         m_layout: null,
 
         //----------------------------------------------------------------------
+        // from Screen
         init: function (layout)
         {
             var grid_x, grid_y;
@@ -815,11 +849,12 @@
         },
 
         //-------------------------------------------------------------------
+        // from Screen
         reset: function ()
-        {
-        },
+        {},
 
         //-------------------------------------------------------------------
+        // from Screen
         handleMouseClick: function ()
         {
             var clicked_monster = null;
@@ -843,6 +878,7 @@
         },
 
         //-------------------------------------------------------------------
+        // from Screen
         handleKeyPress: function ()
         {
             if (49 == key_code) // 1
@@ -885,7 +921,13 @@
             //alert(key_code);
         },
 
+        //----------------------------------------------------------------------
+        // from Screen
+        handleTimeStep: function ()
+        {},
+
         //-------------------------------------------------------------------
+        // from Screen
         paint: function ()
         {
             g_ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -921,20 +963,80 @@
         }
     };
 
+    //##########################################################################
+    // game engine
+
+    //--------------------------------------------------------------------------
+    function init() {
+        //Canvas stuff
+        var canvas_obj = $("#canvas");
+        g_canvas = canvas_obj[0];
+        g_ctx = g_canvas.getContext("2d");
+        g_ctx.textAlign="start";
+        g_ctx.textBaseline="middle";
+
+        var layout = {};
+        layout.m_canvas_width = canvas_obj.width();
+        layout.m_canvas_height = canvas_obj.height();
+        layout.m_command_tray_y_offset
+            = layout.m_canvas_height - GameConstants.m_command_tray_height;
+
+        var cell_size_by_width
+            = layout.m_canvas_width / GameConstants.m_grid_size;
+        var cell_size_by_height
+            = layout.m_command_tray_y_offset / GameConstants.m_grid_size;
+        layout.m_cell_size = Math.min(cell_size_by_width, cell_size_by_height);
+        layout.m_grid_size = layout.m_cell_size * GameConstants.m_grid_size;
+        layout.m_grid_x_offset
+            = (layout.m_canvas_width - layout.m_grid_size) / 2;
+        layout.m_grid_y_offset
+            = (layout.m_command_tray_y_offset - layout.m_grid_size) / 2;
+
+        g_canvas.addEventListener("mousedown", function (event) {
+            var rect = g_canvas.getBoundingClientRect();
+            mouse_x = event.clientX - rect.left;
+            mouse_y = event.clientY - rect.top;
+            mouse_click_pending = true;
+        }, false);
+
+        g_canvas.addEventListener("keydown", function (event) {
+            key_code = event.which;
+            key_press_pending = true;
+        }, false);
+
+        // can't do this until you've set up canvas_width and canvas_height
+        ResourceTracker.init(layout);
+        GameScreen.init(layout);
+
+        switchToScreen(ResourceTracker);
+
+        // start processing events
+        setTimeout(eventLoop, 40);
+    }
+
+    //--------------------------------------------------------------------------
+    function switchToScreen(screen)
+    {
+        screen.reset();
+        g_current_screen = screen;
+    }
+
     //--------------------------------------------------------------------------
     function eventLoop() {
         var start_time = Date.now();
 
         if (mouse_click_pending) {
             mouse_click_pending = false;
-            current_screen.handleMouseClick();
+            g_current_screen.handleMouseClick();
         }
 
         if (key_press_pending) {
             key_press_pending = false;
-            current_screen.handleKeyPress();
+            g_current_screen.handleKeyPress();
         }
-        current_screen.paint();
+
+        g_current_screen.handleTimeStep();
+        g_current_screen.paint();
 
         var end_time = Date.now();
         var comp_time = end_time - start_time;
