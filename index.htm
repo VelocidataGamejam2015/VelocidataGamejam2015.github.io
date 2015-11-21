@@ -217,7 +217,8 @@
 
     //--------------------------------------------------------------------------
     var AudioComponents = {
-        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker)
+        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker),
+        m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav", ResourceTracker)
     };
 
     //##########################################################################
@@ -518,6 +519,7 @@
                             if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
                                 // monster eats the city - Remove the city from the screen
                                 GameScreen.m_cities.splice(city_index, 1);
+                                AudioComponents.m_crush_city.play();
                                 break;
                             }
                         }
