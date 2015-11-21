@@ -4,6 +4,7 @@
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js" type="text/javascript"></script>
 </head>
 <body style="background-color: black;">
 <canvas tabindex='1' id="canvas" width="1024" height="1024"></canvas>
@@ -77,13 +78,15 @@
 
         //----------------------------------------------------------------------
         loadAudio: function (url, resource_tracker) {
-            var audio = new Audio();
+            var audio = new buzz.sound(
+              url, {
+              //formats: [ "wav" ],
+              preload: false,
+              autoplay: false,
+              loop: false
+            });;
             resource_tracker.add();
-            audio.addEventListener(
-                'loadeddata',
-                resource_tracker.onload(null),
-                false);
-            audio.src = url;
+            audio.bindOnce("loadeddata", resource_tracker.onload(null));
             return audio;
         }
     };
@@ -842,7 +845,23 @@
         //-------------------------------------------------------------------
         handleKeyPress: function ()
         {
-            if (65 == key_code) // a
+            if (49 == key_code) // 1
+            {
+              //play the sound and restart it
+              if (!AudioComponents.m_bg.isPaused())
+              {
+                AudioComponents.m_bg.stop();
+                AudioComponents.m_bg.setTime(0);
+                AudioComponents.m_bg.play();
+              }
+              AudioComponents.m_bg.play();
+            }
+            else if (50 == key_code) //20
+            {
+              //start background music loop
+              AudioComponents.m_bg.loop().play();
+            }
+            else if (65 == key_code) // a
             {
                 this.m_command_tray.rotate_left();
             }
