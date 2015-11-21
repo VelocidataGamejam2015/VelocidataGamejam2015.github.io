@@ -1016,6 +1016,7 @@
         m_command_tray: null,
         m_active_monster: null,
         m_layout: null,
+        m_next_city_percent: 0,
 
         //----------------------------------------------------------------------
         containsCity: function (grid_x, grid_y)
@@ -1232,9 +1233,71 @@
             this.m_monster_info_box.handleTimeStep();
 
             this.m_command_tray.handleTimeStep();
+
+            this.handleSpawnCityTimeStep()
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        handleSpawnCityTimeStep: function ()
+        {
+            this.m_next_city_percent += 1;
+            if (this.m_next_city_percent >= 100)
+            {
+                this.m_next_city_percent = 0;
+
+                var spawn_sites_map = {};
+                var maybePlaceCity = function(city, x, y) {
+                    if (GameScreen.canPlaceCityAtGrid(x, y))
+                    {
+                        spawn_sites_map[x + "," + y] = [city, x, y];
+                    }
+                };
+                var maybePlaceAroundCity = function(city, x, y) {
+                    maybePlaceCity(city, x + 1, y);
+                    maybePlaceCity(city, x - 1, y);
+                    maybePlaceCity(city, x, y + 1);
+                    maybePlaceCity(city, x, y - 1);
+                };
+                Util.forEach(this.m_cities, function(city){
+                    maybePlaceAroundCity(city, city.m_grid_x, city.m_grid_y)
+                });
+                var spawn_sites_arr = [];
+                Util.forEach(spawn_sites_map, function (site){
+                    spawn_sites_arr.push(site);
+                });
+                if (0 != spawn_sites_arr.length)
+                {
+                    var spawn_site = Util.randomItem(spawn_sites_arr);
+                    var old_city = spawn_site[0];
+                    var grid_x = spawn_site[1];
+                    var grid_y = spawn_site[2];
+                    var new_city = new City(
+                        old_city.m_type, grid_x, grid_y, this.m_layout);
+                    this.m_cities.push(new_city);
+                }
+            }
+        },
+
+        //----------------------------------------------------------------------
+        canPlaceCityAtGrid: function (x, y)
+        {
+            if (x < 0 || x >= GameConstants.m_grid_size
+                || y < 0 || y >= GameConstants.m_grid_size)
+            {
+                return false;
+            }
+            var return_value = true;
+            Util.forEach(this.m_cities.concat(this.m_monsters), function(game_object){
+                if (game_object.m_grid_x == x && game_object.m_grid_y == y)
+                {
+                    return_value = false;
+                }
+            });
+
+            return return_value;
+        },
+
+        //----------------------------------------------------------------------
         // from Screen
         paint: function ()
         {
