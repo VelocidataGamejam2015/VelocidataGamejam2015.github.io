@@ -62,6 +62,17 @@
                 + grid_y * layout.m_cell_size
             && mouse_y < layout.m_grid_y_offset
                 + (grid_y + 1) * layout.m_cell_size);
+        },
+
+        //----------------------------------------------------------------------
+        loadImage: function (url, resource_tracker) {
+            var image = new Image();
+            resource_tracker.add();
+            image.onload = function(event) {
+                resource_tracker.onload(event);
+            };
+            image.src = url;
+            return image;
         }
     };
 
@@ -111,41 +122,112 @@
 
     //##########################################################################
 
+    var ResourceTracker = {
+        m_added: 1, //I track myself loading
+        m_loaded: 0,
+        m_layout: null,
+
+        //----------------------------------------------------------------------
+        init: function (layout)
+        {
+            this.m_layout = layout;
+            this.onload(null); //and here I'm loaded
+        },
+
+        //-------------------------------------------------------------------
+        reset: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        handleMouseClick: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        handleKeyPress: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        paint: function ()
+        {
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            // paint the background
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                    0, 0,
+                    this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
+
+            g_ctx.font="Bold 80px Arial";
+            g_ctx.fillStyle = "rgb(128, 128, 128)";
+            g_ctx.textAlign = "center";
+            g_ctx.textBaseline = "middle";
+            g_ctx.fillText
+            (
+                Math.floor(100 * this.m_loaded / this.m_added) + "%",
+                this.m_layout.m_canvas_width / 2,
+                this.m_layout.m_canvas_height / 2
+            );
+        },
+
+
+        add: function() {
+            ++this.m_added;
+        },
+
+        onload: function (event) {
+            ++this.m_loaded;
+            if (this.m_loaded == this.m_added)
+            {
+                this.onAllLoaded();
+            }
+        },
+
+        onAllLoaded: function() {
+            GameScreen.init(this.m_layout);
+            GameScreen.reset();
+            current_screen = GameScreen;
+        }
+    };
+
+
     //--------------------------------------------------------------------------
     const MonsterTypes = {
         GLUTTONY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/S_GluttonousTomato.png",
+            m_image: Util.loadImage("Assets/Monsters/S_GluttonousTomato.png", ResourceTracker),
             m_name: "GluttonousTomato.txt"
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/LustyCarrot.png",
+            m_image: Util.loadImage("Assets/Monsters/LustyCarrot.png", ResourceTracker),
             m_name: "LustyCarrot.txt"
         },
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
             m_name: "RedMonster.txt"
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
             m_name: "RedMonster.txt"
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
             m_name: "RedMonster.txt"
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
             m_name: "RedMonster.txt"
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image_source_file: "Assets/Monsters/RedMonster.png",
+            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
             m_name: "RedMonster.txt"
         }
     };
@@ -155,46 +237,29 @@
     //--------------------------------------------------------------------------
     var Monster = function (monster_type, grid_x, grid_y, layout)
     {
-        //----------------------------------------------------------------------
-        this.loadListener = function ()
-        {
-            if (this.m_image.naturalHeight == "undefined")
-            {
-              return;
-            }
-            this.m_ready = true;
-            this.m_real_width = this.m_layout.m_cell_size;
-            this.m_real_height = this.m_layout.m_cell_size;
-            if (this.m_image.height > this.m_image.width)
-            {
-                this.m_real_width = 1.0 * this.m_layout.m_cell_size *
-                    this.m_image.width / this.m_image.height;
-            }
-            else
-            {
-                this.m_real_height = 1.0 * this.m_layout.m_cell_size *
-                    this.m_image.height / this.m_image.width;
-            }
-            this.m_real_height_offset
-                = this.m_layout.m_cell_size - this.m_real_height;
-            this.m_real_width_offset
-                = (this.m_layout.m_cell_size - this.m_real_width) / 2;
-        };
-
         this.m_type = monster_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
         this.m_layout = layout;
 
-        this.m_ready = false;
-        this.m_real_width = 0;
-        this.m_real_width_offset = 0;
-        this.m_real_height = 0;
-        this.m_real_height_offset = 0;
-        this.m_image = new Image();
-        this.m_image.onload = this.loadListener;
-        this.m_image.src = this.m_type.m_image_source_file;
+        this.m_image = this.m_type.m_image;
         this.m_name = this.m_type.m_name;
+        this.m_real_width = this.m_layout.m_cell_size;
+        this.m_real_height = this.m_layout.m_cell_size;
+        if (this.m_image.height > this.m_image.width)
+        {
+            this.m_real_width = 1.0 * this.m_layout.m_cell_size *
+                    this.m_image.width / this.m_image.height;
+        }
+        else
+        {
+            this.m_real_height = 1.0 * this.m_layout.m_cell_size *
+                    this.m_image.height / this.m_image.width;
+        }
+        this.m_real_height_offset
+                = this.m_layout.m_cell_size - this.m_real_height;
+        this.m_real_width_offset
+                = (this.m_layout.m_cell_size - this.m_real_width) / 2;
 
         this.m_loop = Math.floor(48 * Math.random());
         this.m_asleep = true;
@@ -212,11 +277,6 @@
         //----------------------------------------------------------------------
         this.paint = function ()
         {
-            if (!this.m_ready)
-            {
-                this.loadListener();
-                return;
-            }
             this.m_loop = (this.m_loop + 1) % 48;
             var diff = this.m_loop / 8;
             if (diff > 3)
@@ -547,9 +607,9 @@
         }, false);
 
         //can't do this until you've set up canvas_width and canvas_height
-        GameScreen.init(layout);
-        GameScreen.reset();
-        current_screen = GameScreen;
+        ResourceTracker.init(layout);
+        ResourceTracker.reset();
+        current_screen = ResourceTracker;
 
         // start processing events
         setTimeout(eventLoop, 40);
