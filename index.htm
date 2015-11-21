@@ -57,23 +57,45 @@
         setTimeout(eventLoop, 40);
     }
 
+    var IsMouseClickInCell = function (grid_x, grid_y) {
+        return (mouse_x >= grid_x * cell_width
+            && mouse_x < (grid_x + 1) * cell_width
+            && mouse_y >= grid_y * cell_width
+            && mouse_y < (grid_y +1) * cell_width);
+    };
+
     var Monster = function () {
-        this.grid_x = 0;
-        this.grid_y = 0;
+        this.m_grid_x = 0;
+        this.m_grid_y = 0;
+        this.m_state = 0;
+
+        this.handleMouseClick = function() {
+            if (!IsMouseClickInCell(this.m_grid_x, this.m_grid_y)) { return; }
+            this.m_state = (this.m_state + 1) % 2;
+        };
 
         this.paint = function () {
+            this.setStyle();
+            ctx.fillRect(this.m_grid_x * cell_width, this.m_grid_y * cell_width, cell_width, cell_width);
+        };
+
+        this.setStyle = function() {
             ctx.strokeStyle = "rgb(255, 0, 0)";
-            ctx.fillStyle = "rgb(255, 0, 0)";
-            ctx.fillRect(this.grid_x * cell_width, this.grid_y * cell_width, cell_width, cell_width);
+            if (this.m_state) {
+                ctx.fillStyle = "rgb(0, 255, 0)";
+            } else {
+                ctx.fillStyle = "rgb(255, 0, 0)";
+            }
+
         }
-    }
+    };
 
     //---------------------------------------------------------------------
     var TitleScreen = {
 
         scratches: [],
         monsters: [],
-        countdown: 4,
+        countdown: 1,
         text: "game goes here",
         default_text: "game goes here",
         text1: "w",
@@ -85,7 +107,7 @@
         init: function () {
             this.scratches.push({x_top: 30, x_stray: -5, age: 0, active: 100, period: 170});
             this.scratches.push({x_top: 120, x_stray: 5, age: 0, active: 150, period: 190});
-            this.monsters.push(new Monster())
+            this.monsters.push(new Monster());
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
 
@@ -118,6 +140,11 @@
             this.circle.active = true;
             this.circle.x = mouse_x;
             this.circle.y = mouse_y;
+
+            for (m in this.monsters)
+            {
+                this.monsters[m].handleMouseClick();
+            }
         },
 
         //-------------------------------------------------------------------
@@ -211,7 +238,7 @@
 
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.fillStyle = "rgb(0, 0, 0)";
-            ctx.globalAlpha = 0.25
+            ctx.globalAlpha = 0.25;
             if (Math.random() < .15) {
                 ctx.globalAlpha = 0.35;
             }
