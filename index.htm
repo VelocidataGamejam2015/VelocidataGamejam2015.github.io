@@ -248,12 +248,12 @@
         this.m_real_height = this.m_layout.m_cell_size;
         if (this.m_image.height > this.m_image.width)
         {
-            this.m_real_width = 1.0 * this.m_layout.m_cell_size *
+            this.m_real_width = this.m_layout.m_cell_size *
                     this.m_image.width / this.m_image.height;
         }
         else
         {
-            this.m_real_height = 1.0 * this.m_layout.m_cell_size *
+            this.m_real_height = this.m_layout.m_cell_size *
                     this.m_image.height / this.m_image.width;
         }
         this.m_real_height_offset
