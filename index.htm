@@ -143,6 +143,11 @@
         //----------------------------------------------------------------------
         this.loadListener = function()
         {
+            if(this.m_image.naturalHeight == "undefined")
+            {
+              return;
+            }
+            this.m_ready = true;
             this.m_real_width = g_cell_size;
             this.m_real_height = g_cell_size;
             if(this.m_image.height > this.m_image.width)
@@ -157,8 +162,6 @@
             }
             this.m_real_height_offset = g_cell_size - this.m_real_height;
             this.m_real_width_offset = (g_cell_size - this.m_real_width)/2;
-            this.m_ready = this.m_real_width_offset == 0 ||
-                this.m_real_height_offset == 0;
         }
 
         this.m_type = monster_type;
