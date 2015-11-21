@@ -560,9 +560,60 @@
                 text += step.m_char;
             });
 
-            g_ctx.fillStyle = "rgb(0,0,0)";
-            g_ctx.font = "Bold 80px Arial";
+            g_ctx.fillStyle = "rgb(192,192,192)";
+            g_ctx.font = "Bold 20px Arial";
+            g_ctx.textAlign="start";
+            g_ctx.textBaseline="middle";
             g_ctx.fillText(text, x, y);
+        }
+    };
+
+    //--------------------------------------------------------------------------
+    var CommandTray = function(layout)
+    {
+        this.m_commands = [];
+        this.m_layout = layout;
+
+        //----------------------------------------------------------------------
+        this.push = function (monster_command)
+        {
+            this.m_commands.push(monster_command);
+        };
+
+        //----------------------------------------------------------------------
+        this.rotate_left = function()
+        {
+            Util.forEach(this.m_commands, function(command) {
+                command.rotate_left();
+            });
+        };
+
+        //----------------------------------------------------------------------
+        this.rotate_right = function()
+        {
+            Util.forEach(this.m_commands, function(command) {
+                command.rotate_right();
+            });
+        };
+
+        //----------------------------------------------------------------------
+        this.paint = function()
+        {
+            var layout = this.m_layout;
+            var x_offset = layout.m_grid_x_offset + layout.m_cell_size / 2;
+            var y_offset = layout.m_command_tray_y_offset
+                + GameConstants.m_command_tray_height / 2;
+
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                0, this.m_layout.m_command_tray_y_offset,
+                this.m_layout.m_canvas_width, GameConstants.m_command_tray_height);
+
+            Util.forEach(this.m_commands, function(command) {
+               command.paint(x_offset, y_offset);
+                x_offset += layout.m_cell_size
+            });
+
         }
     };
 
@@ -574,8 +625,8 @@
         var canvas_obj = $("#canvas");
         g_canvas = canvas_obj[0];
         g_ctx = g_canvas.getContext("2d");
-        g_ctx.textAlign = "center";
-        g_ctx.textBaseline = "middle";
+        g_ctx.textAlign="start";
+        g_ctx.textBaseline="middle";
 
         var layout = {};
         layout.m_canvas_width = canvas_obj.width();
@@ -621,7 +672,7 @@
         m_monsters: null,
         m_cities: null,
         m_monster_info_box: null,
-        m_available_commands: null,
+        m_command_tray: null,
         m_layout: null,
 
         //----------------------------------------------------------------------
@@ -675,7 +726,7 @@
             this.m_monster_info_box = new MonsterInfoBox(layout);
 
             // initialize commands
-            this.m_available_commands = [];
+            this.m_command_tray = new CommandTray(layout);
             var command_index, step_index;
             for (command_index = 0;
                 command_index < GameConstants.m_initial_commands;
@@ -689,8 +740,7 @@
                     monster_command.push(
                         Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
                 }
-                this.m_available_commands[command_index]
-                    = monster_command;
+                this.m_command_tray.push(monster_command);
             }
         },
 
@@ -723,6 +773,15 @@
         //-------------------------------------------------------------------
         handleKeyPress: function ()
         {
+            if (65 == key_code)
+            {
+                this.m_command_tray.rotate_left();
+            }
+            else if (68 == key_code)
+            {
+                this.m_command_tray.rotate_right();
+            }
+            //alert(key_code);
         },
 
         //-------------------------------------------------------------------
@@ -757,11 +816,7 @@
             this.m_monster_info_box.paint();
 
             // paint the command tray
-            g_ctx.fillStyle = "rgb(0, 0, 0)";
-            g_ctx.fillRect(
-                0, this.m_layout.m_command_tray_y_offset,
-                this.m_layout.m_canvas_width, GameConstants.m_command_tray_height);
-
+            this.m_command_tray.paint();
         }
     };
 
