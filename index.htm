@@ -83,13 +83,6 @@
         this.m_grid_y = grid_y;
 
         //----------------------------------------------------------------------
-        /** Returns true if the click was handled. */
-        this.handleMouseClick = function ()
-        {
-            return false;
-        };
-
-        //----------------------------------------------------------------------
         this.paint = function ()
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
@@ -148,14 +141,8 @@
         this.m_loop = 0;
 
         //----------------------------------------------------------------------
-        /** Returns true if the click was handled. */
-        this.handleMouseClick = function() {
-            if (!isMouseClickInCell(this.m_grid_x, this.m_grid_y))
-            {
-                return false;
-            }
-            this.m_state = (this.m_state + 1) % 2;
-            return true;
+        this.isClicked = function() {
+            return isMouseClickInCell(this.m_grid_x, this.m_grid_y)
         };
 
         //----------------------------------------------------------------------
@@ -200,13 +187,6 @@
         this.m_type = city_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
-
-        //----------------------------------------------------------------------
-        /** Returns true if the click was handled. */
-        this.handleMouseClick = function ()
-        {
-            return false;
-        };
 
         //----------------------------------------------------------------------
         this.paint = function ()
@@ -331,11 +311,19 @@
         //-------------------------------------------------------------------
         handleMouseClick: function ()
         {
+            var clicked_monster = null;
+            Util.forEach(g_game_state.m_monsters, function(monster) {
+                if (monster.isClicked())
+                {
+                    clicked_monster = monster;
+                }
+            });
 
-//            for (m in this.monsters)
-//            {
-//                this.monsters[m].handleMouseClick();
-//            }
+            if (null != clicked_monster)
+            {
+                alert("Monster clicked.");
+            }
+
         },
 
         //-------------------------------------------------------------------
