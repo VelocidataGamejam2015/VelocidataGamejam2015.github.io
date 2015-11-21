@@ -115,62 +115,6 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
-    const LandTypes = {
-        GRASS: {
-            m_fill_style: "rgb(0, 255, 0)"
-        },
-        DIRT: {
-            m_fill_style: "rgb(150, 75, 0)"
-        },
-        TREES: {
-            m_fill_style: "rgb(0, 128, 0)"
-        },
-        ROCKS: {
-            m_fill_style: "rgb(128, 128, 128)"
-        },
-        WATER: {
-            m_fill_style: "rgb(128, 128, 255)"
-        }
-    };
-    const ALL_LAND_TYPES = [];
-    Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
-
-    //--------------------------------------------------------------------------
-    // implements GameObject
-    var Land = function (land_type, grid_x, grid_y, layout)
-    {
-        this.m_type = land_type;
-        this.m_grid_x = grid_x;
-        this.m_grid_y = grid_y;
-        this.m_layout = layout;
-
-        //----------------------------------------------------------------------
-        // from GameObject
-        this.isClicked = function()
-        {};
-
-        //----------------------------------------------------------------------
-        // from GameObject
-        this.handleTimeStep = function ()
-        {};
-
-        //----------------------------------------------------------------------
-        // from GameObject
-        this.paint = function ()
-        {
-            g_ctx.fillStyle = this.m_type.m_fill_style;
-            g_ctx.fillRect(
-                this.m_layout.m_grid_x_offset
-                    + this.m_grid_x * this.m_layout.m_cell_size,
-                this.m_layout.m_grid_y_offset
-                    + this.m_grid_y * this.m_layout.m_cell_size,
-                this.m_layout.m_cell_size, this.m_layout.m_cell_size);
-        };
-    };
-
-    //##########################################################################
-
-    //--------------------------------------------------------------------------
     var ResourceTracker = {
         m_added: 1, // I track myself loading
         m_loaded: 0,
@@ -258,6 +202,62 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
+    const LandTypes = {
+        GRASS: {
+            m_fill_style: "rgb(0, 255, 0)"
+        },
+        DIRT: {
+            m_fill_style: "rgb(150, 75, 0)"
+        },
+        TREES: {
+            m_fill_style: "rgb(0, 128, 0)"
+        },
+        ROCKS: {
+            m_fill_style: "rgb(128, 128, 128)"
+        },
+        WATER: {
+            m_fill_style: "rgb(128, 128, 255)"
+        }
+    };
+    const ALL_LAND_TYPES = [];
+    Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
+
+    //--------------------------------------------------------------------------
+    // implements GameObject
+    var Land = function (land_type, grid_x, grid_y, layout)
+    {
+        this.m_type = land_type;
+        this.m_grid_x = grid_x;
+        this.m_grid_y = grid_y;
+        this.m_layout = layout;
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.paint = function ()
+        {
+            g_ctx.fillStyle = this.m_type.m_fill_style;
+            g_ctx.fillRect(
+                this.m_layout.m_grid_x_offset
+                + this.m_grid_x * this.m_layout.m_cell_size,
+                this.m_layout.m_grid_y_offset
+                + this.m_grid_y * this.m_layout.m_cell_size,
+                this.m_layout.m_cell_size, this.m_layout.m_cell_size);
+        };
+    };
+
+    //##########################################################################
+
+    //--------------------------------------------------------------------------
     const MonsterTypes = {
         GLUTTONY: {
             m_fill_style: "rgb(255, 127, 0)",
@@ -272,27 +272,27 @@
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
-            m_name: "RedMonster.txt"
+            m_name: "GreedyCelery.txt"
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
-            m_name: "RedMonster.txt"
+            m_name: "PridefulEggplant.txt"
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
-            m_name: "RedMonster.txt"
+            m_name: "WrathfulPepper.txt"
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
-            m_name: "RedMonster.txt"
+            m_image: Util.loadImage("Assets/Monsters/S_EnviousBroccoli.png", ResourceTracker),
+            m_name: "EnviousBroccoli.txt"
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
-            m_name: "RedMonster.txt"
+            m_name: "SlothfulPotato.txt"
         }
     };
     const ALL_MONSTER_TYPES = [];
