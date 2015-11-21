@@ -225,21 +225,21 @@
         {
             // try to the right of the monster
             this.m_pos_x = Math.floor((monster.m_grid_x + 1) * g_cell_size
-                + .25 * g_cell_size);
+                + .125 * g_cell_size);
             if (this.m_pos_x + this.m_width > canvas_width)
             {
                 // position to the left of the monster
                 this.m_pos_x = Math.floor((monster.m_grid_x ) * g_cell_size
-                    - .25 * g_cell_size - this.m_width);
+                    - .125 * g_cell_size - this.m_width);
             }
 
             // try against top edge of monstor
-            this.m_pos_y = monster.m_grid_y * g_cell_size;
+            this.m_pos_y = monster.m_grid_y * g_cell_size + .125 * g_cell_size;
             if (this.m_pos_y + this.m_height > canvas_height)
             {
                 // position against bottom edge of the monster
                 this.m_pos_y = (monster.m_grid_y + 1) * g_cell_size
-                   - this.m_height;
+                   - .125 * g_cell_size - this.m_height;
             }
             this.m_visible = true;
         };
