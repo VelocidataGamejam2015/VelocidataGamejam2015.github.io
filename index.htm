@@ -308,6 +308,8 @@
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
         this.m_layout = layout;
+        
+        this.m_move_percent = 0;
 
         this.m_image = this.m_type.m_image;
         this.m_name = this.m_type.m_name;
@@ -330,14 +332,16 @@
 
         this.m_breathing_loop = Math.floor(48 * Math.random());
         this.m_asleep = true;
-        this.z_age = -1;
-        this.z_x = 0;
-        this.z_y = 0;
+        this.Z_AGE_INITIAL_VALUE = -1;
+        this.m_z_age = this.Z_AGE_INITIAL_VALUE;
+        this.m_z_x = 0;
+        this.m_z_y = 0;
 
         //----------------------------------------------------------------------
         this.giveCommand = function(command)
         {
             this.m_commands.push(command);
+            this.m_asleep = false;
         };
 
         //----------------------------------------------------------------------
@@ -356,31 +360,71 @@
 
             if (this.m_asleep)
             {
-                this.z_age = this.z_age + 1;
-                if (this.z_age == 0)
+                this.m_z_age = this.m_z_age + 1;
+                if (this.m_z_age == 0)
                 {
-                    this.z_x = this.m_layout.m_grid_x_offset
+                    this.m_z_x = this.m_layout.m_grid_x_offset
                         + this.m_grid_x * this.m_layout.m_cell_size
                         + (2 * this.m_layout.m_cell_size / 3);
-                    this.z_y = this.m_layout.m_grid_y_offset
+                    this.m_z_y = this.m_layout.m_grid_y_offset
                         + this.m_grid_y * this.m_layout.m_cell_size
                         + (this.m_layout.m_cell_size / 3);
                 }
-                if (this.z_age >= 30)
+                if (this.m_z_age >= 30)
                 {
                     if (Math.random() < .05)
                     {
-                        this.z_age = -10;
+                        this.m_z_age = -10;
                     }
                 }
-                if (this.z_age >= 60)
+                if (this.m_z_age >= 60)
                 {
-                    this.z_age = -10;
+                    this.m_z_age = -10;
                 }
-                if (this.z_age >= 0)
+                if (this.m_z_age >= 0)
                 {
-                    this.z_y = this.z_y - Math.random();
-                    this.z_x = this.z_x + 2 * Math.random();
+                    this.m_z_y = this.m_z_y - Math.random();
+                    this.m_z_x = this.m_z_x + 2 * Math.random();
+                }
+            }
+            else
+            {
+                this.m_move_percent += 1;
+                if (this.m_move_percent >= 100)
+                {
+                    this.m_move_percent = 0;
+
+                    // move to next cell
+                    this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
+                    this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
+                    if (this.m_grid_x < 0)
+                    {
+                        this.m_grid_x = 0;
+                    }
+                    if (this.m_grid_x >= GameConstants.m_grid_size)
+                    {
+                        this.m_grid_x = GameConstants.m_grid_size - 1;
+                    }
+                    if (this.m_grid_y < 0)
+                    {
+                        this.m_grid_y = 0;
+                    }
+                    if (this.m_grid_y >= GameConstants.m_grid_size)
+                    {
+                        this.m_grid_y = GameConstants.m_grid_size - 1;
+                    }
+
+                    // remove step
+                    this.m_commands[0].m_steps.shift();
+                    if (0 == this.m_commands[0].m_steps.length)
+                    {
+                        this.m_commands.shift();
+                        if (0 == this.m_commands.length)
+                        {
+                            this.m_asleep = true;
+                            this.m_z_age = this.Z_AGE_INITIAL_VALUE;
+                        }
+                    }
                 }
             }
         };
@@ -394,28 +438,38 @@
             {
                 diff = 6 - diff
             }
+            var x_shift = 0;
+            var y_shift = 0;
+            if (!this.m_asleep)
+            {
+                var shift = this.m_move_percent / 100 * this.m_layout.m_cell_size;
+                x_shift = this.m_commands[0].m_steps[0].m_dx * shift;
+                y_shift = this.m_commands[0].m_steps[0].m_dy * shift;
+            }
             g_ctx.drawImage(
                 this.m_image,
                 this.m_layout.m_grid_x_offset
                     + this.m_grid_x * this.m_layout.m_cell_size
+                    + x_shift
                     + diff
                     + this.m_real_width_offset,
                 this.m_layout.m_grid_y_offset
                     + this.m_grid_y * this.m_layout.m_cell_size
+                    + y_shift
                     + 2 * diff
                     + this.m_real_height_offset,
                 this.m_real_width - diff * 2,
                 this.m_real_height - diff * 2
             );
-            if (this.m_asleep && this.z_age >= 0)
+            if (this.m_asleep && this.m_z_age >= 0)
             {
                 g_ctx.font = "45px Arial";
                 g_ctx.globalAlpha = 0.7;
                 g_ctx.fillStyle = "rgb(192,192,192)";
                 g_ctx.fillText(
                     "Z",
-                    this.z_x,
-                    this.z_y
+                    this.m_z_x,
+                    this.m_z_y
                 );
                 g_ctx.globalAlpha = 1;
             }
@@ -783,7 +837,6 @@
                command.paint(x_offset, y_offset);
                 x_offset += layout.m_cell_size
             });
-
         }
     };
 
