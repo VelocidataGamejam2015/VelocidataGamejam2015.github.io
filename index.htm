@@ -203,52 +203,10 @@
 
     //##########################################################################
 
-    var g_game_state;
-
     //--------------------------------------------------------------------------
-    function initGameState()
+    var MonsterInfoBox = function ()
     {
-        g_game_state = {};
-        var grid_x, grid_y;
-
-        // initialize land
-        g_game_state.m_land = [];
-        for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
-        {
-            g_game_state.m_land[grid_x] = [];
-            for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
-            {
-                g_game_state.m_land[grid_x][grid_y]
-                        = new Land(Util.randomItem(ALL_LAND_TYPES), grid_x, grid_y);
-            }
-        }
-
-        // initialize monsters
-        g_game_state.m_monsters = [];
-        var monster_index;
-        for (monster_index = 0;
-             monster_index < GameConstants.m_initial_monsters;
-             ++monster_index)
-        {
-            grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-            grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-            g_game_state.m_monsters[monster_index]
-                = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
-        }
-
-        // initialize cities
-        g_game_state.m_cities = [];
-        var city_index;
-        for (city_index = 0;
-            city_index < GameConstants.m_initial_cities;
-            ++city_index)
-        {
-            grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-            grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-            g_game_state.m_cities[city_index]
-                = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
-        }
-    }
+    };
 
     //##########################################################################
 
@@ -296,11 +254,52 @@
 
     //--------------------------------------------------------------------------
     var GameScreen = {
+        m_land: null,
+        m_monsters: null,
+        m_cities: null,
 
         //----------------------------------------------------------------------
         init: function ()
         {
-            initGameState()
+            var grid_x, grid_y;
+
+            // initialize land
+            this.m_land = [];
+            for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
+            {
+                this.m_land[grid_x] = [];
+                for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
+                {
+                    this.m_land[grid_x][grid_y]
+                        = new Land(Util.randomItem(ALL_LAND_TYPES), grid_x, grid_y);
+                }
+            }
+
+            // initialize monsters
+            this.m_monsters = [];
+            var monster_index;
+            for (monster_index = 0;
+                monster_index < GameConstants.m_initial_monsters;
+                ++monster_index)
+            {
+                grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+                grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+                this.m_monsters[monster_index]
+                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
+            }
+
+            // initialize cities
+            this.m_cities = [];
+            var city_index;
+            for (city_index = 0;
+                city_index < GameConstants.m_initial_cities;
+                ++city_index)
+            {
+                grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
+                grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+                this.m_cities[city_index]
+                    = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
+            }
         },
 
         //-------------------------------------------------------------------
@@ -312,7 +311,7 @@
         handleMouseClick: function ()
         {
             var clicked_monster = null;
-            Util.forEach(g_game_state.m_monsters, function(monster) {
+            Util.forEach(this.m_monsters, function(monster) {
                 if (monster.isClicked())
                 {
                     clicked_monster = monster;
@@ -342,15 +341,15 @@
             {
                 for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
                 {
-                    g_game_state.m_land[grid_x][grid_y].paint();
+                    this.m_land[grid_x][grid_y].paint();
                 }
             }
 
-            Util.forEach(g_game_state.m_monsters, function(monster){
+            Util.forEach(this.m_monsters, function(monster){
                 monster.paint();
             });
 
-            Util.forEach(g_game_state.m_cities, function(city){
+            Util.forEach(this.m_cities, function(city){
                 city.paint();
             })
         }
