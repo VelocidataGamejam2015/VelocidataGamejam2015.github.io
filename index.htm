@@ -152,9 +152,9 @@
 
         //----------------------------------------------------------------------
         this.paint = function () {
-            this.loop = (this.loop+1) % 50
-            diff = this.loop / 5;
-            if(diff > 5)
+            this.loop = (this.loop + 1) % 50;
+            var diff = this.loop / 5;
+            if (diff > 5)
             {
                 diff = 10 - diff
             }
@@ -166,6 +166,9 @@
                     g_cell_size - diff * 2,
                     g_cell_size - diff * 2
             );
+
+            // g_ctx.fillStyle = this.m_type.m_fill_style;
+            // g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size, g_cell_size, g_cell_size);
         };
     };
 
@@ -238,20 +241,20 @@
             grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
             grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
             g_game_state.m_monsters[monster_index]
-                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
+                = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
         }
 
         // initialize cities
         g_game_state.m_cities = [];
         var city_index;
         for (city_index = 0;
-             city_index < GameConstants.m_initial_cities;
-             ++city_index)
+            city_index < GameConstants.m_initial_cities;
+            ++city_index)
         {
             grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
             grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
             g_game_state.m_cities[city_index]
-                    = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
+                = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
         }
     }
 
@@ -342,6 +345,10 @@
                     g_game_state.m_land[grid_x][grid_y].paint();
                 }
             }
+
+            Util.forEach(g_game_state.m_monsters, function(monster){
+                monster.paint();
+            })
         }
     };
 
