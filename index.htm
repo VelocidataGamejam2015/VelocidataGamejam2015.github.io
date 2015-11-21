@@ -29,7 +29,12 @@
         m_initial_cities: 3,
         m_initial_commands: 3,
         m_command_size: 3,
-        m_command_tray_height: 100
+        m_command_tray_height: 100,
+
+        m_city_origin_x_offset: 100,
+        m_city_origin_y_offset: 100,
+        m_city_width: 200,
+        m_city_height: 200
     };
 
     //--------------------------------------------------------------------------
@@ -514,14 +519,19 @@
     //--------------------------------------------------------------------------
     const CityTypes = {
         BLUE: {
-            m_fill_style: "rgb(100, 100, 255)"
+            m_fill_style: "rgb(100, 100, 255)",
+            m_overlay_image: Util.loadImage("Assets/City/S_City1BlueMask.png", ResourceTracker)
         },
         RED: {
-            m_fill_style: "rgb(255, 100, 100)"
+            m_fill_style: "rgb(255, 100, 100)",
+            m_overlay_image: Util.loadImage("Assets/City/S_City1RedMask.png", ResourceTracker)
         }
     };
     const ALL_CITY_TYPES = [];
     Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
+    const CityUtil = {
+        m_background_image: Util.loadImage("Assets/City/S_City1.png", ResourceTracker)
+    };
 
     //--------------------------------------------------------------------------
     // implements GameObject
@@ -546,17 +556,22 @@
         // from GameObject
         this.paint = function ()
         {
-            g_ctx.fillStyle = this.m_type.m_fill_style;
-            g_ctx.beginPath();
-            g_ctx.arc(
-                this.m_layout.m_grid_x_offset
-                    + this.m_grid_x * this.m_layout.m_cell_size
-                    + this.m_layout.m_cell_size / 2,
-                this.m_layout.m_grid_y_offset
-                    + this.m_grid_y * this.m_layout.m_cell_size
-                    + this.m_layout.m_cell_size / 2,
-                this.m_layout.m_cell_size / 3, 0, 2 * Math.PI);
-            g_ctx.fill();
+            var x_origin = this.m_layout.m_grid_x_offset
+                + this.m_grid_x * this.m_layout.m_cell_size;
+            var y_origin = this.m_layout.m_grid_y_offset
+                + this.m_grid_y * this.m_layout.m_cell_size;
+            g_ctx.drawImage(
+                CityUtil.m_background_image,
+                x_origin - GameConstants.m_city_origin_x_offset,
+                y_origin - GameConstants.m_city_origin_y_offset,
+                GameConstants.m_city_width,
+                GameConstants.m_city_height);
+            g_ctx.drawImage(
+                this.m_type.m_overlay_image,
+                x_origin - GameConstants.m_city_origin_x_offset,
+                y_origin - GameConstants.m_city_origin_y_offset,
+                GameConstants.m_city_width,
+                GameConstants.m_city_height);
         };
     };
 
@@ -1066,12 +1081,12 @@
                 land.paint();
             });
 
-            Util.forEach(this.m_monsters, function(monster){
-                monster.paint();
-            });
-
             Util.forEach(this.m_cities, function(city){
                 city.paint();
+            });
+
+            Util.forEach(this.m_monsters, function(monster){
+                monster.paint();
             });
 
             this.m_monster_info_box.paint();
