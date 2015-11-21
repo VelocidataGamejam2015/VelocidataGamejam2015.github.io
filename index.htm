@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-  </head>
-  <body style="background-color: black;">
-    <canvas tabindex='1' id="canvas" width="1024" height="1024"></canvas>
-    <script>
-      //#######################################################################
-      // The game
+</head>
+<body style="background-color: black;">
+<canvas tabindex='1' id="canvas" width="1024" height="1024"></canvas>
+<script>
+    //#######################################################################
+    // The game
 
-      var canvas;
-      var ctx;
-      var canvas_width;
-      var canvas_height;
-      var cell_width;
-      var current_screen;
+    var canvas;
+    var ctx;
+    var canvas_width;
+    var canvas_height;
+    var cell_width;
+    var current_screen;
 
-      var mouse_x = 0;
-      var mouse_y = 0;
-      var mouse_click_pending = false;
-      var key_code = 0;
-      var key_press_pending = false;
-      var grid_size = 10;
+    var mouse_x = 0;
+    var mouse_y = 0;
+    var mouse_click_pending = false;
+    var key_code = 0;
+    var key_press_pending = false;
+    var grid_size = 10;
 
-      //---------------------------------------------------------------------
-      function init()
-      {
+    //---------------------------------------------------------------------
+    function init() {
         //Canvas stuff
         canvas = $("#canvas")[0];
         ctx = canvas.getContext("2d");
@@ -37,18 +36,16 @@
         //Lets save the cell width in a variable for easy control
         cell_width = canvas_height / grid_size;
 
-        canvas.addEventListener("mousedown", function (event)
-        {
-          var rect = canvas.getBoundingClientRect();
-          mouse_x = event.clientX - rect.left;
-          mouse_y = event.clientY - rect.top;
-          mouse_click_pending = true;
+        canvas.addEventListener("mousedown", function (event) {
+            var rect = canvas.getBoundingClientRect();
+            mouse_x = event.clientX - rect.left;
+            mouse_y = event.clientY - rect.top;
+            mouse_click_pending = true;
         }, false);
-        
-        canvas.addEventListener("keydown", function (event)
-        {
-          key_code = event.which;
-          key_press_pending = true;
+
+        canvas.addEventListener("keydown", function (event) {
+            key_code = event.which;
+            key_press_pending = true;
         }, false);
 
         //can't do this until you've set up canvas_width and canvas_height
@@ -58,239 +55,225 @@
 
         // start processing events
         setTimeout(eventLoop, 40);
-      }
-      
-      var Monster = function(){
-         this.grid_x = 0;
-         this.grid_y = 0;
-         
-         this.draw = function() {
+    }
+
+    var Monster = function () {
+        this.grid_x = 0;
+        this.grid_y = 0;
+
+        this.paint = function () {
             ctx.strokeStyle = "rgb(255, 0, 0)";
             ctx.fillStyle = "rgb(255, 0, 0)";
-            canvas.fillRect(this.grid_x*cell_width, this.grid_y*cell_width, cell_width, cell_width);
-         }
-      }
-      
-      //---------------------------------------------------------------------
-      var TitleScreen = {
+            ctx.fillRect(this.grid_x * cell_width, this.grid_y * cell_width, cell_width, cell_width);
+        }
+    }
 
-        scratches : [],
-        countdown : 4,
-        text : "game goes here",
-        default_text : "game goes here",
-        text1 : "w",
-        second_countdown_timer : {active: true, period: 25, current: 0},
-        circle : {active: false, x: 0, y: 0},
-        
-        
-        //-------------------------------------------------------------------
-        init: function ()
-        {
-          this.scratches.push({x_top: 30, x_stray:-5, age:0, active:100, period:170});
-          this.scratches.push({x_top: 120, x_stray:5, age:0, active:150, period:190});
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          
-          this.size_upper = ctx.measureText(this.text1).width;
-        },
-        
-        //-------------------------------------------------------------------
-        reset: function ()
-        {
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          this.scratches[0].x_top = 30;
-          this.scratches[0].x_stray = -5;
-          this.scratches[0].age = 0; 
-          this.scratches[0].active = 100;
-          this.scratches[0].period = 170;
-          this.scratches[1].x_top = 120;
-          this.scratches[1].x_stray = 5;
-          this.scratches[1].age = 0; 
-          this.scratches[1].active = 150;
-          this.scratches[1].period = 190;
-          this.second_countdown_timer.active = true;
-          this.second_countdown_timer.current = 0;
-          this.countdown = 4;
-          this.circle.active = false;
-          this.circle.x = 0;
-          this.circle.y = 0;
-        },
-      
-        //-------------------------------------------------------------------
-        handleMouseClick: function ()
-        {
-          this.circle.active = true;
-          this.circle.x = mouse_x;
-          this.circle.y = mouse_y;
-        },
-        
-        //-------------------------------------------------------------------
-        handleKeyPress: function ()
-        {
-          this.text = key_code;
-        },
+    //---------------------------------------------------------------------
+    var TitleScreen = {
+
+        scratches: [],
+        monsters: [],
+        countdown: 4,
+        text: "game goes here",
+        default_text: "game goes here",
+        text1: "w",
+        second_countdown_timer: {active: true, period: 25, current: 0},
+        circle: {active: false, x: 0, y: 0},
+
 
         //-------------------------------------------------------------------
-        paint: function ()
-        {
-          //Lets paint the canvas now
-          //set up blank canvas
-          ctx.fillStyle = "white";
-          ctx.fillRect(0, 0, canvas_width, canvas_height);
-          
-          //start jitter
-          jiggle_x = Math.random() * 1;
-          jiggle_y = Math.random() * 1;
-          ctx.setTransform(1, 0, 0, 1, jiggle_x, jiggle_y);
-          
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = "rgb(0, 0, 0)";
-          ctx.fillStyle = "rgb(128, 128, 128)";
-          
-          if(this.circle.active)
-          {
-             ctx.beginPath();
-             ctx.arc(this.circle.x, this.circle.y, 20, 0, 2*Math.PI);
-             ctx.stroke();
-          }
-          
-          if(this.second_countdown_timer.active)
-          {
-            this.second_countdown_timer.current++;
-            if(this.second_countdown_timer.current >= this.second_countdown_timer.period)
-            {
-              this.second_countdown_timer.current = 0;
-              this.countdown--;
-              if(this.countdown == 0)
-              {
-                this.countdown = 1;
-                this.second_countdown_timer.active = false;
-              }
-            }
-          
-          
-            ctx.beginPath();
-            ctx.moveTo(canvas_width / 2, canvas_height / 2);
-            ctx.lineTo(canvas_width / 2, -canvas_height / 2);
-            var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
-            ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5*Math.PI, percent_covered*Math.PI);
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(canvas_width / 2, canvas_height / 2);
-            ctx.lineTo(canvas_width / 2, -canvas_height / 2);
-            var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
-            ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5*Math.PI, percent_covered*Math.PI);
-            ctx.closePath();
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(0,canvas_height / 2);
-            ctx.lineTo(canvas_width, canvas_height / 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(canvas_width / 2, 0);
-            ctx.lineTo(canvas_width / 2, canvas_height);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(canvas_width / 2, canvas_height / 2, 450, 0, 2*Math.PI);
-            ctx.arc(canvas_width / 2, canvas_height / 2, 500, 0, 2*Math.PI);
-            ctx.stroke();
-            
-            ctx.font="800px Arial";
-            ctx.fillStyle = "rgb(0, 0, 0)";
+        init: function () {
+            this.scratches.push({x_top: 30, x_stray: -5, age: 0, active: 100, period: 170});
+            this.scratches.push({x_top: 120, x_stray: 5, age: 0, active: 150, period: 190});
+            this.monsters.push(new Monster())
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(this.countdown, canvas_width / 2, canvas_height / 2);
-          }
-          else
-          {
-            ctx.fillStyle = "rgb(0,0,0)";
-            ctx.font = "Bold 80px Arial";
-            ctx.fillText(this.text, canvas_width/2, canvas_height/2);
-          }
-          
-          //finish jitter
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = "rgb(0, 0, 0)";
-          ctx.fillStyle = "rgb(128, 128, 128)";
-          
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.fillStyle = "rgb(0, 0, 0)";
-          ctx.globalAlpha=0.25
-          if(Math.random() < .15)
-          {
-            ctx.globalAlpha=0.35;
-          }
-          ctx.strokeStyle = "rgb(196, 196, 196)";
-          ctx.fillSytle = ctx.strokeStyle;
-          for(var j = 0; j < 1; j++)
-          {
-            ctx.beginPath();
-            ctx.arc(Math.random()*canvas_height,Math.random()*canvas_height,2,0,2*Math.PI);
-            ctx.fill();
-          }
-          ctx.lineWidth = 1;
-          for(var j = 0; j < 2; j++)
-          {
-            this.scratches[j].age++;
-            if(this.scratches[j].age >= this.scratches[j].period)
-            {
-              this.scratches[j].age = 0;
-              this.scratches[j].x_top = Math.random() * canvas_width;
-              this.scratches[j].x_stray = Math.random() * 9 - 4.5;
-            }
-            if(this.scratches[j].age < this.scratches[j].active && this.scratches[j].age % 10 != 0)
-            {
-              ctx.beginPath();
-              ctx.moveTo(this.scratches[j].x_top,0);
-              ctx.lineTo(this.scratches[j].x_top+this.scratches[j].x_stray,canvas_height);
-              this.scratches[j].x_top += Math.random() * 7 - 3.5;
-              this.scratches[j].x_stray += Math.random() * 2- 1;
-              ctx.stroke();
-            }
-          }
-          ctx.fillStyle = "rgb(0, 0, 0)";
-          ctx.fillRect(0, 0, canvas_width, canvas_height);
-          ctx.globalAlpha=1;
-        }
-      };
 
-      //---------------------------------------------------------------------
-      function eventLoop()
-      {
+            this.size_upper = ctx.measureText(this.text1).width;
+        },
+
+        //-------------------------------------------------------------------
+        reset: function () {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            this.scratches[0].x_top = 30;
+            this.scratches[0].x_stray = -5;
+            this.scratches[0].age = 0;
+            this.scratches[0].active = 100;
+            this.scratches[0].period = 170;
+            this.scratches[1].x_top = 120;
+            this.scratches[1].x_stray = 5;
+            this.scratches[1].age = 0;
+            this.scratches[1].active = 150;
+            this.scratches[1].period = 190;
+            this.second_countdown_timer.active = true;
+            this.second_countdown_timer.current = 0;
+            this.countdown = 4;
+            this.circle.active = false;
+            this.circle.x = 0;
+            this.circle.y = 0;
+        },
+
+        //-------------------------------------------------------------------
+        handleMouseClick: function () {
+            this.circle.active = true;
+            this.circle.x = mouse_x;
+            this.circle.y = mouse_y;
+        },
+
+        //-------------------------------------------------------------------
+        handleKeyPress: function () {
+            this.text = key_code;
+        },
+
+        //-------------------------------------------------------------------
+        paint: function () {
+            //Lets paint the canvas now
+            //set up blank canvas
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas_width, canvas_height);
+
+            //start jitter
+            jiggle_x = Math.random() * 1;
+            jiggle_y = Math.random() * 1;
+            ctx.setTransform(1, 0, 0, 1, jiggle_x, jiggle_y);
+
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "rgb(0, 0, 0)";
+            ctx.fillStyle = "rgb(128, 128, 128)";
+
+            if (this.circle.active) {
+                ctx.beginPath();
+                ctx.arc(this.circle.x, this.circle.y, 20, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+
+            if (this.second_countdown_timer.active) {
+                this.second_countdown_timer.current++;
+                if (this.second_countdown_timer.current >= this.second_countdown_timer.period) {
+                    this.second_countdown_timer.current = 0;
+                    this.countdown--;
+                    if (this.countdown == 0) {
+                        this.countdown = 1;
+                        this.second_countdown_timer.active = false;
+                    }
+                }
+
+
+                ctx.beginPath();
+                ctx.moveTo(canvas_width / 2, canvas_height / 2);
+                ctx.lineTo(canvas_width / 2, -canvas_height / 2);
+                var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
+                ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
+                ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(canvas_width / 2, canvas_height / 2);
+                ctx.lineTo(canvas_width / 2, -canvas_height / 2);
+                var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
+                ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
+                ctx.closePath();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, canvas_height / 2);
+                ctx.lineTo(canvas_width, canvas_height / 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(canvas_width / 2, 0);
+                ctx.lineTo(canvas_width / 2, canvas_height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(canvas_width / 2, canvas_height / 2, 450, 0, 2 * Math.PI);
+                ctx.arc(canvas_width / 2, canvas_height / 2, 500, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                ctx.font = "800px Arial";
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.countdown, canvas_width / 2, canvas_height / 2);
+            }
+            else {
+                ctx.fillStyle = "rgb(0,0,0)";
+                ctx.font = "Bold 80px Arial";
+                ctx.fillText(this.text, canvas_width / 2, canvas_height / 2);
+                for(var m in this.monsters)
+                {
+                    this.monsters[m].paint();
+                }
+            }
+
+            //finish jitter
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "rgb(0, 0, 0)";
+            ctx.fillStyle = "rgb(128, 128, 128)";
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.fillStyle = "rgb(0, 0, 0)";
+            ctx.globalAlpha = 0.25
+            if (Math.random() < .15) {
+                ctx.globalAlpha = 0.35;
+            }
+            ctx.strokeStyle = "rgb(196, 196, 196)";
+            ctx.fillSytle = ctx.strokeStyle;
+            for (var j = 0; j < 1; j++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas_height, Math.random() * canvas_height, 2, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            ctx.lineWidth = 1;
+            for (var j = 0; j < 2; j++) {
+                this.scratches[j].age++;
+                if (this.scratches[j].age >= this.scratches[j].period) {
+                    this.scratches[j].age = 0;
+                    this.scratches[j].x_top = Math.random() * canvas_width;
+                    this.scratches[j].x_stray = Math.random() * 9 - 4.5;
+                }
+                if (this.scratches[j].age < this.scratches[j].active && this.scratches[j].age % 10 != 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.scratches[j].x_top, 0);
+                    ctx.lineTo(this.scratches[j].x_top + this.scratches[j].x_stray, canvas_height);
+                    this.scratches[j].x_top += Math.random() * 7 - 3.5;
+                    this.scratches[j].x_stray += Math.random() * 2 - 1;
+                    ctx.stroke();
+                }
+            }
+            ctx.fillStyle = "rgb(0, 0, 0)";
+            ctx.fillRect(0, 0, canvas_width, canvas_height);
+            ctx.globalAlpha = 1;
+        }
+    };
+
+    //---------------------------------------------------------------------
+    function eventLoop() {
         var start_time = Date.now();
 
-        if (mouse_click_pending)
-        {
-          mouse_click_pending = false;
-          current_screen.handleMouseClick();
+        if (mouse_click_pending) {
+            mouse_click_pending = false;
+            current_screen.handleMouseClick();
         }
 
-        if(key_press_pending)
-        {
-          key_press_pending = false;
-          current_screen.handleKeyPress();
+        if (key_press_pending) {
+            key_press_pending = false;
+            current_screen.handleKeyPress();
         }
         current_screen.paint();
 
         var end_time = Date.now();
         var comp_time = end_time - start_time;
-        if (comp_time > 40 || comp_time < 0)
-        {
-          setTimeout(eventLoop, 0);
+        if (comp_time > 40 || comp_time < 0) {
+            setTimeout(eventLoop, 0);
         }
-        else
-        {
-          setTimeout(eventLoop, 40 - comp_time);
+        else {
+            setTimeout(eventLoop, 40 - comp_time);
         }
 
-      }
+    }
 
-      // launch the game once the document is fully loaded
-      $(document).ready(init);
+    // launch the game once the document is fully loaded
+    $(document).ready(init);
 
-      </script>
-   </body>
+</script>
+</body>
 </html>
