@@ -217,7 +217,8 @@
 
     //--------------------------------------------------------------------------
     var AudioComponents = {
-        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker)
+        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker),
+        m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav", ResourceTracker)
     };
 
     //##########################################################################
@@ -308,7 +309,7 @@
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/LustyCarrot.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_LustyCarrot.png", ResourceTracker),
             m_name: "LustyCarrot.txt"
         },
         GREED: {
@@ -318,12 +319,12 @@
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_PridefulEggplant.png", ResourceTracker),
             m_name: "PridefulEggplant.txt"
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_WrathfulPepper.png", ResourceTracker),
             m_name: "WrathfulPepper.txt"
         },
         ENVY: {
@@ -333,7 +334,7 @@
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/RedMonster.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_SlothfulPotato.png", ResourceTracker),
             m_name: "SlothfulPotato.txt"
         }
     };
@@ -512,12 +513,14 @@
 
                         var monster=this;
                         var city_index;
-                        for(city_index==0; city_index < GameScreen.m_cities.length; city_index++)
+                        for(city_index=0; city_index < GameScreen.m_cities.length; city_index++)
                         {
-                            var city = GameScreen.m_cities[cityindex]
+                            var city = GameScreen.m_cities[city_index];
                             if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
                                 // monster eats the city - Remove the city from the screen
-                                GameScreen.m_cities.remove(cityindex,1)
+                                GameScreen.m_cities.splice(city_index, 1);
+                                AudioComponents.m_crush_city.play();
+                                break;
                             }
                         }
                     }
