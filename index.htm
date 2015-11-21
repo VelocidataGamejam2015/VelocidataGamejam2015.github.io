@@ -8,14 +8,11 @@
 <body style="background-color: black;">
 <canvas tabindex='1' id="canvas" width="1024" height="1024"></canvas>
 <script>
-    //#######################################################################
+    //##########################################################################
     // The game
 
-    var canvas;
+    var g_canvas;
     var g_ctx;
-    var canvas_width;
-    var canvas_height;
-    var g_cell_size;
     var current_screen;
 
     var mouse_x = 0;
@@ -30,11 +27,13 @@
         m_initial_monsters: 2,
         m_initial_cities: 3,
         m_initial_commands: 3,
-        m_command_size: 3
+        m_command_size: 3,
+        m_command_tray_height: 100
     };
 
     //--------------------------------------------------------------------------
     const Util = {
+        //----------------------------------------------------------------------
         forEach: function (obj, fn)
         {
             var key;
@@ -47,12 +46,24 @@
             }
         },
 
+        //----------------------------------------------------------------------
         randomItem: function (arr)
         {
             return arr[Math.floor(Math.random() * arr.length)];
+        },
+
+        //----------------------------------------------------------------------
+        isMouseClickInCell: function (grid_x, grid_y, layout) {
+            return (mouse_x >= layout.m_grid_x_offset
+                + grid_x * layout.m_cell_size
+            && mouse_x < layout.m_grid_x_offset
+                + (grid_x + 1) * layout.m_cell_size
+            && mouse_y >= layout.m_grid_y_offset
+                + grid_y * layout.m_cell_size
+            && mouse_y < layout.m_grid_y_offset
+                + (grid_y + 1) * layout.m_cell_size);
         }
     };
-    //--------------------------------------------------------------------------
 
     //##########################################################################
 
@@ -78,19 +89,23 @@
     Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
-    var Land = function (land_type, grid_x, grid_y)
+    var Land = function (land_type, grid_x, grid_y, layout)
     {
         this.m_type = land_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
+        this.m_layout = layout;
 
         //----------------------------------------------------------------------
         this.paint = function ()
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
             g_ctx.fillRect(
-                this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
-                g_cell_size, g_cell_size);
+                this.m_layout.m_grid_x_offset
+                    + this.m_grid_x * this.m_layout.m_cell_size,
+                this.m_layout.m_grid_y_offset
+                    + this.m_grid_y * this.m_layout.m_cell_size,
+                this.m_layout.m_cell_size, this.m_layout.m_cell_size);
         };
     };
 
@@ -138,35 +153,38 @@
     Util.forEach(MonsterTypes, function(item) { ALL_MONSTER_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
-    var Monster = function (monster_type, grid_x, grid_y)
+    var Monster = function (monster_type, grid_x, grid_y, layout)
     {
         //----------------------------------------------------------------------
-        this.loadListener = function()
+        this.loadListener = function ()
         {
-            if(this.m_image.naturalHeight == "undefined")
+            if (this.m_image.naturalHeight == "undefined")
             {
               return;
             }
             this.m_ready = true;
-            this.m_real_width = g_cell_size;
-            this.m_real_height = g_cell_size;
-            if(this.m_image.height > this.m_image.width)
+            this.m_real_width = this.m_layout.m_cell_size;
+            this.m_real_height = this.m_layout.m_cell_size;
+            if (this.m_image.height > this.m_image.width)
             {
-                this.m_real_width = 1.0 * g_cell_size *
-                     this.m_image.width / this.m_image.height;
+                this.m_real_width = 1.0 * this.m_layout.m_cell_size *
+                    this.m_image.width / this.m_image.height;
             }
             else
             {
-                this.m_real_height = 1.0 * g_cell_size *
-                        this.m_image.height / this.m_image.width;
+                this.m_real_height = 1.0 * this.m_layout.m_cell_size *
+                    this.m_image.height / this.m_image.width;
             }
-            this.m_real_height_offset = g_cell_size - this.m_real_height;
-            this.m_real_width_offset = (g_cell_size - this.m_real_width)/2;
-        }
+            this.m_real_height_offset
+                = this.m_layout.m_cell_size - this.m_real_height;
+            this.m_real_width_offset
+                = (this.m_layout.m_cell_size - this.m_real_width) / 2;
+        };
 
         this.m_type = monster_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
+        this.m_layout = layout;
 
         this.m_ready = false;
         this.m_real_width = 0;
@@ -178,7 +196,7 @@
         this.m_image.src = this.m_type.m_image_source_file;
         this.m_name = this.m_type.m_name;
 
-        this.m_loop = Math.floor(48*Math.random());
+        this.m_loop = Math.floor(48 * Math.random());
         this.m_asleep = true;
         this.z_age = 0;
         this.z_x = 0;
@@ -187,13 +205,14 @@
         //----------------------------------------------------------------------
         this.isClicked = function()
         {
-            return isMouseClickInCell(this.m_grid_x, this.m_grid_y)
+            return Util.isMouseClickInCell(
+                this.m_grid_x, this.m_grid_y, this.m_layout);
         };
 
         //----------------------------------------------------------------------
         this.paint = function ()
         {
-            if(!this.m_ready)
+            if (!this.m_ready)
             {
                 this.loadListener();
                 return;
@@ -204,40 +223,49 @@
             {
                 diff = 6 - diff
             }
-            g_ctx.drawImage
-            (
+            g_ctx.drawImage(
                 this.m_image,
-                this.m_grid_x * g_cell_size + diff + this.m_real_width_offset,
-                this.m_grid_y * g_cell_size + 2*diff + this.m_real_height_offset,
+                this.m_layout.m_grid_x_offset
+                    + this.m_grid_x * this.m_layout.m_cell_size
+                    + diff
+                    + this.m_real_width_offset,
+                this.m_layout.m_grid_y_offset
+                    + this.m_grid_y * this.m_layout.m_cell_size
+                    + 2 * diff
+                    + this.m_real_height_offset,
                 this.m_real_width - diff * 2,
                 this.m_real_height - diff * 2
             );
-            if(this.m_asleep)
+            if (this.m_asleep)
             {
-                if(this.z_age == 0)
+                if (this.z_age == 0)
                 {
-                    this.z_x = this.m_grid_x * g_cell_size + (2 * g_cell_size / 3);
-                    this.z_y = this.m_grid_y * g_cell_size + (g_cell_size / 3);
+                    this.z_x = this.m_layout.m_grid_x_offset
+                        + this.m_grid_x * this.m_layout.m_cell_size
+                        + (2 * this.m_layout.m_cell_size / 3);
+                    this.z_y = this.m_layout.m_grid_y_offset
+                        + this.m_grid_y * this.m_layout.m_cell_size
+                        + (this.m_layout.m_cell_size / 3);
                 }
-                if(this.z_age >= 30)
+                if (this.z_age >= 30)
                 {
-                    if(Math.random()<.05)
+                    if (Math.random() < .05)
                     {
                         this.z_age = -10;
                     }
                 }
-                if(this.z_age>=60) {
+                if (this.z_age >= 60)
+                {
                     this.z_age = -10;
                 }
-                if(this.z_age >= 0)
+                if (this.z_age >= 0)
                 {
                     this.z_y = this.z_y - Math.random();
-                    this.z_x = this.z_x + 2*Math.random();
+                    this.z_x = this.z_x + 2 * Math.random();
                     g_ctx.font = "45px Arial";
                     g_ctx.globalAlpha = 0.7;
                     g_ctx.fillStyle = "rgb(192,192,192)";
-                    g_ctx.fillText
-                    (
+                    g_ctx.fillText(
                         "Z",
                         this.z_x,
                         this.z_y
@@ -246,8 +274,6 @@
                 }
                 this.z_age = this.z_age + 1;
             }
-            // g_ctx.fillStyle = this.m_type.m_fill_style;
-            // g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size, g_cell_size, g_cell_size);
         };
     };
 
@@ -266,11 +292,12 @@
     Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
-    var City = function (city_type, grid_x, grid_y)
+    var City = function (city_type, grid_x, grid_y, layout)
     {
         this.m_type = city_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
+        this.m_layout = layout;
 
         //----------------------------------------------------------------------
         this.paint = function ()
@@ -278,9 +305,13 @@
             g_ctx.fillStyle = this.m_type.m_fill_style;
             g_ctx.beginPath();
             g_ctx.arc(
-                this.m_grid_x * g_cell_size + g_cell_size / 2,
-                this.m_grid_y * g_cell_size + g_cell_size / 2
-                , g_cell_size / 3, 0, 2 * Math.PI);
+                this.m_layout.m_grid_x_offset
+                    + this.m_grid_x * this.m_layout.m_cell_size
+                    + this.m_layout.m_cell_size / 2,
+                this.m_layout.m_grid_y_offset
+                    + this.m_grid_y * this.m_layout.m_cell_size
+                    + this.m_layout.m_cell_size / 2,
+                this.m_layout.m_cell_size / 3, 0, 2 * Math.PI);
             g_ctx.fill();
         };
     };
@@ -288,13 +319,14 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
-    var MonsterInfoBox = function ()
+    var MonsterInfoBox = function (layout)
     {
         this.m_visible = false;
         this.m_pos_x = 0;
         this.m_pos_y = 0;
-        this.m_width = Math.floor(g_cell_size * 3.75);
-        this.m_height = Math.floor(g_cell_size * 1.75);
+        this.m_layout = layout;
+        this.m_width = Math.floor(this.m_layout.m_cell_size * 3.75);
+        this.m_height = Math.floor(this.m_layout.m_cell_size * 1.75);
         this.m_banner_height = Math.floor(this.m_height * .20);
         this.m_text_height = Math.floor(this.m_banner_height * .60);
         this.m_font = this.m_text_height + "px Arial";
@@ -311,24 +343,29 @@
         this.showNextToMonster = function(monster)
         {
             this.m_name = monster.m_name;
+
             // try to the right of the monster
-            this.m_pos_x = Math.floor((monster.m_grid_x + 1) * g_cell_size
-                + .125 * g_cell_size);
-            if (this.m_pos_x + this.m_width > canvas_width)
+            this.m_pos_x = (monster.m_grid_x + 1) * this.m_layout.m_cell_size
+                + .125 * this.m_layout.m_cell_size;
+            if (this.m_pos_x + this.m_width > this.m_layout.m_grid_size)
             {
                 // position to the left of the monster
-                this.m_pos_x = Math.floor((monster.m_grid_x ) * g_cell_size
-                    - .125 * g_cell_size - this.m_width);
+                this.m_pos_x = (monster.m_grid_x ) * this.m_layout.m_cell_size
+                    - .125 * this.m_layout.m_cell_size - this.m_width;
             }
 
-            // try against top edge of monstor
-            this.m_pos_y = monster.m_grid_y * g_cell_size + .125 * g_cell_size;
-            if (this.m_pos_y + this.m_height > canvas_height)
+            // try against top edge of monster
+            this.m_pos_y = monster.m_grid_y * this.m_layout.m_cell_size
+                + .125 * this.m_layout.m_cell_size;
+            if (this.m_pos_y + this.m_height > this.m_layout.m_grid_size)
             {
                 // position against bottom edge of the monster
-                this.m_pos_y = (monster.m_grid_y + 1) * g_cell_size
-                   - .125 * g_cell_size - this.m_height;
+                this.m_pos_y = (monster.m_grid_y + 1) * this.m_layout.m_cell_size
+                   - .125 * this.m_layout.m_cell_size - this.m_height;
             }
+
+            this.m_pos_x += this.m_layout.m_grid_x_offset;
+            this.m_pos_y += this.m_layout.m_grid_y_offset;
             this.m_visible = true;
         };
 
@@ -342,7 +379,7 @@
             g_ctx.font=this.m_font;
             g_ctx.textAlign="start";
             g_ctx.textBaseline="middle";
-            g_ctx.fillStyle = "rgb(192,192,192)"
+            g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.fillText(
                     text,
                     this.m_pos_x + 10,
@@ -364,11 +401,11 @@
                 this.m_pos_x, this.m_pos_y,
                 this.m_width, this.m_height);
             g_ctx.globalAlpha=1;
-            g_ctx.fillStyle = "rgb(192,192,192)"
+            g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.fillRect(
                     this.m_pos_x, this.m_pos_y,
                     this.m_width, this.m_banner_height);
-            g_ctx.fillStyle = "rgb(32,32,32)"
+            g_ctx.fillStyle = "rgb(32,32,32)";
             g_ctx.strokeRect(
                     this.m_pos_x, this.m_pos_y,
                     this.m_width, this.m_height);
@@ -423,9 +460,10 @@
     Util.forEach(MonsterSteps, function(item) { ALL_MONSTER_STEP_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
-    var MonsterCommand = function()
+    var MonsterCommand = function(layout)
     {
         this.m_steps = [];
+        this.m_layout = layout;
 
         //----------------------------------------------------------------------
         this.push = function (monster_step)
@@ -472,30 +510,43 @@
     //--------------------------------------------------------------------------
     function init() {
         //Canvas stuff
-        canvas = $("#canvas")[0];
-        g_ctx = canvas.getContext("2d");
-        canvas_width = $("#canvas").width();
-        canvas_height = $("#canvas").height();
+        var canvas_obj = $("#canvas");
+        g_canvas = canvas_obj[0];
+        g_ctx = g_canvas.getContext("2d");
         g_ctx.textAlign = "center";
         g_ctx.textBaseline = "middle";
 
-        //Lets save the cell width in a variable for easy control
-        g_cell_size = canvas_height / GameConstants.m_grid_size;
+        var layout = {};
+        layout.m_canvas_width = canvas_obj.width();
+        layout.m_canvas_height = canvas_obj.height();
+        layout.m_command_tray_y_offset
+            = layout.m_canvas_height - GameConstants.m_command_tray_height;
 
-        canvas.addEventListener("mousedown", function (event) {
-            var rect = canvas.getBoundingClientRect();
+        var cell_size_by_width
+            = layout.m_canvas_width / GameConstants.m_grid_size;
+        var cell_size_by_height
+            = layout.m_command_tray_y_offset / GameConstants.m_grid_size;
+        layout.m_cell_size = Math.min(cell_size_by_width, cell_size_by_height);
+        layout.m_grid_size = layout.m_cell_size * GameConstants.m_grid_size;
+        layout.m_grid_x_offset
+            = (layout.m_canvas_width - layout.m_grid_size) / 2;
+        layout.m_grid_y_offset
+            = (layout.m_command_tray_y_offset - layout.m_grid_size) / 2;
+
+        g_canvas.addEventListener("mousedown", function (event) {
+            var rect = g_canvas.getBoundingClientRect();
             mouse_x = event.clientX - rect.left;
             mouse_y = event.clientY - rect.top;
             mouse_click_pending = true;
         }, false);
 
-        canvas.addEventListener("keydown", function (event) {
+        g_canvas.addEventListener("keydown", function (event) {
             key_code = event.which;
             key_press_pending = true;
         }, false);
 
         //can't do this until you've set up canvas_width and canvas_height
-        GameScreen.init();
+        GameScreen.init(layout);
         GameScreen.reset();
         current_screen = GameScreen;
 
@@ -504,25 +555,20 @@
     }
 
     //--------------------------------------------------------------------------
-    var isMouseClickInCell = function (grid_x, grid_y) {
-        return (mouse_x >= grid_x * g_cell_size
-        && mouse_x < (grid_x + 1) * g_cell_size
-        && mouse_y >= grid_y * g_cell_size
-        && mouse_y < (grid_y +1) * g_cell_size);
-    };
-
-    //--------------------------------------------------------------------------
     var GameScreen = {
         m_land: null,
         m_monsters: null,
         m_cities: null,
         m_monster_info_box: null,
         m_available_commands: null,
+        m_layout: null,
 
         //----------------------------------------------------------------------
-        init: function ()
+        init: function (layout)
         {
             var grid_x, grid_y;
+
+            this.m_layout = layout;
 
             // initialize land
             this.m_land = [];
@@ -532,7 +578,8 @@
                 for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
                 {
                     this.m_land[grid_x][grid_y]
-                        = new Land(Util.randomItem(ALL_LAND_TYPES), grid_x, grid_y);
+                        = new Land(Util.randomItem(ALL_LAND_TYPES),
+                            grid_x, grid_y, layout);
                 }
             }
 
@@ -546,7 +593,8 @@
                 grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_monsters[monster_index]
-                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
+                    = new Monster(Util.randomItem(ALL_MONSTER_TYPES),
+                        grid_x, grid_y, layout);
             }
 
             // initialize cities
@@ -559,10 +607,11 @@
                 grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_cities[city_index]
-                    = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
+                    = new City(Util.randomItem(ALL_CITY_TYPES),
+                        grid_x, grid_y, layout);
             }
 
-            this.m_monster_info_box = new MonsterInfoBox();
+            this.m_monster_info_box = new MonsterInfoBox(layout);
 
             // initialize commands
             this.m_available_commands = [];
@@ -576,7 +625,8 @@
                     step_index < GameConstants.m_command_size;
                     ++step_index)
                 {
-                    monster_command.push(Util.randomItem(ALL_MONSTER_STEP_TYPES));
+                    monster_command.push(
+                        Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
                 }
                 this.m_available_commands[command_index]
                     = monster_command;
@@ -619,6 +669,12 @@
         {
             g_ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+            // paint the background
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                0, 0,
+                this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
+
             // paint the land
             var grid_x, grid_y;
             for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
@@ -638,6 +694,13 @@
             });
 
             this.m_monster_info_box.paint();
+
+            // paint the command tray
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                0, this.m_layout.m_command_tray_y_offset,
+                this.m_layout.m_canvas_width, GameConstants.m_command_tray_height);
+
         }
     };
 
