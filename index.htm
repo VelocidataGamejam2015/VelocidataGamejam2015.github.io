@@ -351,6 +351,9 @@
         this.m_grid_z = GameConstants.m_monster_z_order;
         this.m_z_order_y_boost = 0;
         this.m_layout = layout;
+
+        this.m_x_shift = 0;
+        this.m_y_shift = 0;
         
         this.m_move_percent = 0;
         this.m_is_valid_step = false;
@@ -427,8 +430,18 @@
         // from GameObject
         this.isClicked = function()
         {
-            return Util.isMouseClickInCell(
-                this.m_grid_x, this.m_grid_y, this.m_layout);
+            return (mouse_x >= this.m_layout.m_grid_x_offset
+                + this.m_grid_x * this.m_layout.m_cell_size
+                + this.m_x_shift
+                && mouse_x < this.m_layout.m_grid_x_offset
+                + (this.m_grid_x + 1) * this.m_layout.m_cell_size
+                + this.m_x_shift
+                && mouse_y >= this.m_layout.m_grid_y_offset
+                + this.m_grid_y * this.m_layout.m_cell_size
+                + this.m_y_shift
+                && mouse_y < this.m_layout.m_grid_y_offset
+                + (this.m_grid_y + 1) * this.m_layout.m_cell_size
+                + this.m_y_shift);
         };
 
         //----------------------------------------------------------------------
@@ -525,6 +538,23 @@
                     }
                 }
             }
+
+            if (!this.m_asleep)
+            {
+                var move_percent = this.m_move_percent;
+                if (!this.m_is_valid_step && move_percent > 50)
+                {
+                    move_percent = 100 - move_percent;
+                }
+                var shift = move_percent / 100 * this.m_layout.m_cell_size;
+
+                this.m_x_shift = this.m_commands[0].m_steps[0].m_dx * shift;
+                this.m_y_shift = this.m_commands[0].m_steps[0].m_dy * shift;
+            }
+            else {
+                this.m_x_shift = 0;
+                this.m_y_shift = 0;
+            }
         };
 
         //----------------------------------------------------------------------
@@ -536,30 +566,16 @@
             {
                 diff = 6 - diff
             }
-            var x_shift = 0;
-            var y_shift = 0;
-            if (!this.m_asleep)
-            {
-                var move_percent = this.m_move_percent;
-                if (!this.m_is_valid_step && move_percent > 50)
-                {
-                    move_percent = 100 - move_percent;
-                }
-                var shift = move_percent / 100 * this.m_layout.m_cell_size;
-
-                x_shift = this.m_commands[0].m_steps[0].m_dx * shift;
-                y_shift = this.m_commands[0].m_steps[0].m_dy * shift;
-            }
             g_ctx.drawImage(
                 this.m_image,
                 this.m_layout.m_grid_x_offset
                     + this.m_grid_x * this.m_layout.m_cell_size
-                    + x_shift
+                    + this.m_x_shift
                     + diff
                     + this.m_real_width_offset,
                 this.m_layout.m_grid_y_offset
                     + this.m_grid_y * this.m_layout.m_cell_size
-                    + y_shift
+                    + this.m_y_shift
                     + 2 * diff
                     + this.m_real_height_offset,
                 this.m_real_width - diff * 2,
