@@ -87,8 +87,8 @@
         {
             g_ctx.fillStyle = this.m_type.m_fill_style;
             g_ctx.fillRect(
-                    this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
-                    g_cell_size, g_cell_size);
+                this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
+                g_cell_size, g_cell_size);
         };
     };
 
@@ -141,12 +141,14 @@
         this.m_loop = 0;
 
         //----------------------------------------------------------------------
-        this.isClicked = function() {
+        this.isClicked = function()
+        {
             return isMouseClickInCell(this.m_grid_x, this.m_grid_y)
         };
 
         //----------------------------------------------------------------------
-        this.paint = function () {
+        this.paint = function ()
+        {
             this.m_loop = (this.m_loop + 1) % 50;
             var diff = this.m_loop / 5;
             if (diff > 5)
@@ -206,6 +208,55 @@
     //--------------------------------------------------------------------------
     var MonsterInfoBox = function ()
     {
+        this.m_visible = false;
+        this.m_pos_x = 0;
+        this.m_pos_y = 0;
+        this.m_width = Math.floor(g_cell_size * 3.75);
+        this.m_height = Math.floor(g_cell_size * 1.75);
+
+        //----------------------------------------------------------------------
+        this.hide = function()
+        {
+          this.m_visible = false;
+        };
+
+        //----------------------------------------------------------------------
+        this.showNextToMonster = function(monster)
+        {
+            // try to the right of the monster
+            this.m_pos_x = Math.floor((monster.m_grid_x + 1) * g_cell_size
+                + .25 * g_cell_size);
+            if (this.m_pos_x + this.m_width > canvas_width)
+            {
+                // position to the left of the monster
+                this.m_pos_x = Math.floor((monster.m_grid_x ) * g_cell_size
+                    - .25 * g_cell_size - this.m_width);
+            }
+
+            // try against top edge of monstor
+            this.m_pos_y = monster.m_grid_y * g_cell_size;
+            if (this.m_pos_y + this.m_height > canvas_height)
+            {
+                // position against bottom edge of the monster
+                this.m_pos_y = (monster.m_grid_y + 1) * g_cell_size
+                   - this.m_height;
+            }
+            this.m_visible = true;
+        };
+
+        //----------------------------------------------------------------------
+        this.paint = function ()
+        {
+            if (!this.m_visible)
+            {
+                return;
+            }
+
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                this.m_pos_x, this.m_pos_y,
+                this.m_width, this.m_height);
+        };
     };
 
     //##########################################################################
@@ -257,6 +308,7 @@
         m_land: null,
         m_monsters: null,
         m_cities: null,
+        m_monster_info_box: null,
 
         //----------------------------------------------------------------------
         init: function ()
@@ -300,6 +352,8 @@
                 this.m_cities[city_index]
                     = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
             }
+
+            m_monster_info_box = new MonsterInfoBox();
         },
 
         //-------------------------------------------------------------------
@@ -320,9 +374,12 @@
 
             if (null != clicked_monster)
             {
-                alert("Monster clicked.");
+                m_monster_info_box.showNextToMonster(clicked_monster);
             }
-
+            else
+            {
+                m_monster_info_box.hide()
+            }
         },
 
         //-------------------------------------------------------------------
@@ -351,7 +408,9 @@
 
             Util.forEach(this.m_cities, function(city){
                 city.paint();
-            })
+            });
+
+            m_monster_info_box.paint();
         }
     };
 
