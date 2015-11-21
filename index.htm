@@ -140,15 +140,42 @@
     //--------------------------------------------------------------------------
     var Monster = function (monster_type, grid_x, grid_y)
     {
+        //----------------------------------------------------------------------
+        this.loadListener = function()
+        {
+            this.m_real_width = g_cell_size;
+            this.m_real_height = g_cell_size;
+            if(this.m_image.height > this.m_image.width)
+            {
+                this.m_real_width = 1.0 * g_cell_size *
+                     this.m_image.width / this.m_image.height;
+            }
+            else
+            {
+                this.m_real_height = 1.0 * g_cell_size *
+                        this.m_image.height / this.m_image.width;
+            }
+            this.m_real_height_offset = g_cell_size - this.m_real_height;
+            this.m_real_width_offset = (g_cell_size - this.m_real_width)/2;
+            this.m_ready = this.m_real_width_offset == 0 ||
+                this.m_real_height_offset == 0;
+        }
+
         this.m_type = monster_type;
         this.m_grid_x = grid_x;
         this.m_grid_y = grid_y;
 
-        this.m_image = new Image();
         this.m_ready = false;
+        this.m_real_width = 0;
+        this.m_real_width_offset = 0;
+        this.m_real_height = 0;
+        this.m_real_height_offset = 0;
+        this.m_image = new Image();
+        this.m_image.onload = this.loadListener;
         this.m_image.src = this.m_type.m_image_source_file;
         this.m_name = this.m_type.m_name;
-        this.m_loop = 0;
+
+        this.m_loop = Math.floor(48*Math.random());
         this.m_asleep = true;
         this.z_age = 0;
         this.z_x = 0;
@@ -163,19 +190,24 @@
         //----------------------------------------------------------------------
         this.paint = function ()
         {
-            this.m_loop = (this.m_loop + 1) % 50;
-            var diff = this.m_loop / 5;
-            if (diff > 5)
+            if(!this.m_ready)
             {
-                diff = 10 - diff
+                this.loadListener();
+                return;
+            }
+            this.m_loop = (this.m_loop + 1) % 48;
+            var diff = this.m_loop / 8;
+            if (diff > 3)
+            {
+                diff = 6 - diff
             }
             g_ctx.drawImage
             (
                 this.m_image,
-                this.m_grid_x * g_cell_size + diff,
-                this.m_grid_y * g_cell_size + 2*diff,
-                g_cell_size - diff * 2,
-                g_cell_size - diff * 2
+                this.m_grid_x * g_cell_size + diff + this.m_real_width_offset,
+                this.m_grid_y * g_cell_size + 2*diff + this.m_real_height_offset,
+                this.m_real_width - diff * 2,
+                this.m_real_height - diff * 2
             );
             if(this.m_asleep)
             {
