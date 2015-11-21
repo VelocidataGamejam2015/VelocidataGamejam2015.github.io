@@ -73,6 +73,18 @@
             };
             image.src = url;
             return image;
+        },
+
+        //----------------------------------------------------------------------
+        loadAudio: function (url, resource_tracker) {
+            var audio = new Audio();
+            resource_tracker.add();
+            audio.addEventListener(
+                'loadeddata',
+                resource_tracker.onload(null),
+                false);
+            audio.src = url;
+            return audio;
         }
     };
 
@@ -192,6 +204,9 @@
         }
     };
 
+    var AudioComponents = {
+        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker),
+    };
 
     //--------------------------------------------------------------------------
     const MonsterTypes = {
