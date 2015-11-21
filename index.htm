@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -455,6 +457,7 @@
             else
             {
                 this.m_move_percent += 1;
+
                 if (this.m_move_percent >= 100)
                 {
                     this.m_move_percent = 0;
@@ -464,6 +467,17 @@
                     {
                         this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
                         this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
+
+                        var monster=this;
+                        var cityindex;
+                        for(cityindex==0; cityindex < GameScreen.m_cities.length; cityindex++)
+                        {
+                            var city = Gamescreen.m_cities[cityindex]
+                            if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
+                                // monster eats the city - Remove the city from the screen
+                                GameScreen.m_cities.remove(cityindex,1)
+                            }
+                        }
                     }
 
                     // remove step
