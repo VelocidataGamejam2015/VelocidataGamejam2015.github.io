@@ -31,6 +31,27 @@
         m_initial_cities: 3
     };
 
+    //--------------------------------------------------------------------------
+    const Util = {
+        forEach: function (obj, fn)
+        {
+            var key;
+            for (key in obj)
+            {
+                if (obj.hasOwnProperty(key))
+                {
+                    fn(obj[key]);
+                }
+            }
+        },
+
+        randomItem: function (arr)
+        {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+    };
+    //--------------------------------------------------------------------------
+
     //##########################################################################
 
     //--------------------------------------------------------------------------
@@ -51,6 +72,8 @@
             m_fill_style: "rgb(128, 128, 255)"
         }
     };
+    const ALL_LAND_TYPES = [];
+    Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     var Land = function (land_type, grid_x, grid_y)
@@ -102,6 +125,8 @@
             m_fill_style: "rgb(255, 127, 0)"
         }
     };
+    const ALL_MONSTER_TYPES = [];
+    Util.forEach(MonsterTypes, function(item) { ALL_MONSTER_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     var Monster = function (monster_type, grid_x, grid_y)
@@ -139,6 +164,8 @@
             m_fill_style: "rgb(255, 100, 100)"
         }
     };
+    const ALL_CITY_TYPES = [];
+    Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     var City = function (city_type, grid_x, grid_y)
@@ -181,7 +208,7 @@
             for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
             {
                 g_game_state.m_land[grid_x][grid_y]
-                    = new Land(LandTypes.GRASS, grid_x, grid_y);
+                    = new Land(Util.randomItem(ALL_LAND_TYPES), grid_x, grid_y);
             }
         }
 
@@ -195,7 +222,7 @@
             grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
             grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
             g_game_state.m_monsters[monster_index]
-                = new Monster(MonsterTypes.ENVY, grid_x, grid_y);
+                = new Monster(Util.randomItem(ALL_MONSTER_TYPES), grid_x, grid_y);
         }
 
         // initialize cities
@@ -207,10 +234,12 @@
         {
             grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
             grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-            g_game_state.m_citys[monster_index]
-                = new City(CityTypes.BLUE, grid_x, grid_y);
+            g_game_state.m_cities[city_index]
+                = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
         }
     }
+
+    //##########################################################################
 
     //--------------------------------------------------------------------------
     function init() {
@@ -219,6 +248,8 @@
         g_ctx = canvas.getContext("2d");
         canvas_width = $("#canvas").width();
         canvas_height = $("#canvas").height();
+        g_ctx.textAlign = "center";
+        g_ctx.textBaseline = "middle";
 
         //Lets save the cell width in a variable for easy control
         g_cell_size = canvas_height / GameConstants.m_grid_size;
@@ -236,9 +267,9 @@
         }, false);
 
         //can't do this until you've set up canvas_width and canvas_height
-        TitleScreen.init();
-        TitleScreen.reset();
-        current_screen = TitleScreen;
+        GameScreen.init();
+        GameScreen.reset();
+        current_screen = GameScreen;
 
         // start processing events
         setTimeout(eventLoop, 40);
@@ -254,6 +285,48 @@
 
     //--------------------------------------------------------------------------
     var GameScreen = {
+
+        //----------------------------------------------------------------------
+        init: function ()
+        {
+            initGameState()
+        },
+
+        //-------------------------------------------------------------------
+        reset: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        handleMouseClick: function ()
+        {
+
+//            for (m in this.monsters)
+//            {
+//                this.monsters[m].handleMouseClick();
+//            }
+        },
+
+        //-------------------------------------------------------------------
+        handleKeyPress: function ()
+        {
+        },
+
+        //-------------------------------------------------------------------
+        paint: function ()
+        {
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            // paint the land
+            var grid_x, grid_y;
+            for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
+            {
+                for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
+                {
+                    g_game_state.m_land[grid_x][grid_y].paint();
+                }
+            }
+        }
     };
 
     //--------------------------------------------------------------------------
