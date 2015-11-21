@@ -12,10 +12,10 @@
     // The game
 
     var canvas;
-    var ctx;
+    var g_ctx;
     var canvas_width;
     var canvas_height;
-    var cell_width;
+    var g_cell_size;
     var current_screen;
 
     var mouse_x = 0;
@@ -23,18 +23,146 @@
     var mouse_click_pending = false;
     var key_code = 0;
     var key_press_pending = false;
-    var grid_size = 10;
 
-    //---------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    const GameConstants = {
+        m_grid_size: 10,
+        m_initial_monsters: 2,
+        m_initial_cities: 3
+    };
+
+    //--------------------------------------------------------------------------
+    const LandTypes = {
+        GRASS: {
+            m_fill_style: "rgb(0, 255, 0)"
+        },
+        DIRT: {
+            m_fill_style: "rgb(150, 75, 0)"
+        },
+        TREES: {
+            m_fill_style: "rgb(0, 128, 0)"
+        },
+        ROCKS: {
+            m_fill_style: "rgb(128, 128, 128)"
+        },
+        WATER: {
+            m_fill_style: "rgb(128, 128, 255)"
+        }
+    };
+
+    //--------------------------------------------------------------------------
+    var Land = function (land_type, grid_x, grid_y)
+    {
+        this.m_type = land_type;
+        this.m_grid_x = grid_x;
+        this.m_grid_y = grid_y;
+
+        //----------------------------------------------------------------------
+        /** Returns true if the click was handled. */
+        this.handleMouseClick = function ()
+        {
+            return false;
+        };
+
+        //----------------------------------------------------------------------
+        this.paint = function ()
+        {
+            g_ctx.fillStyle = this.m_type.m_fill_style;
+            g_ctx.fillRect(
+                this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size,
+                g_cell_size, g_cell_size);
+        };
+    };
+
+    //--------------------------------------------------------------------------
+    const MonsterTypes = {
+        GLUTTONY: {},
+        LUST: {},
+        GREED: {},
+        PRIDE: {},
+        WRATH: {},
+        ENVY: {},
+        SLOTH: {}
+    };
+
+    //--------------------------------------------------------------------------
+    var Monster = function (monster_type)
+    {
+        this.m_type = monster_type;
+        this.m_grid_x = 0;
+        this.m_grid_y = 0;
+        this.m_state = 0;
+
+        //----------------------------------------------------------------------
+        /** Returns true if the click was handled. */
+        this.handleMouseClick = function() {
+            if (!isMouseClickInCell(this.m_grid_x, this.m_grid_y))
+            {
+                return false;
+            }
+            this.m_state = (this.m_state + 1) % 2;
+            return true;
+        };
+
+        //----------------------------------------------------------------------
+        this.paint = function () {
+            this.setStyle();
+            g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size, g_cell_size, g_cell_size);
+        };
+
+        //----------------------------------------------------------------------
+        this.setStyle = function() {
+            g_ctx.strokeStyle = "rgb(255, 0, 0)";
+            if (this.m_state) {
+                g_ctx.fillStyle = "rgb(0, 255, 0)";
+            } else {
+                g_ctx.fillStyle = "rgb(255, 0, 0)";
+            }
+        }
+    };
+
+    var g_game_state;
+
+    //--------------------------------------------------------------------------
+    function initGameState()
+    {
+        g_game_state = {};
+        var grid_x, grid_y;
+
+        // initialize land
+        g_game_state.m_land = [];
+        for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
+        {
+            g_game_state.m_land[grid_x] = [];
+            for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
+            {
+                g_game_state.m_land[grid_x][grid_y] = LandTypes.GRASS;
+            }
+        }
+
+        // initialize monsters
+        var monster_index;
+        for (monster_index = 0;
+            monster_index < GameConstants.m_initial_monsters;
+            ++monster_index)
+        {
+            g_game_state.m_monsters[monster_index]
+                = new Monster(MonsterTypes.ENVY)
+        }
+
+        // initialize cities
+    }
+
+    //--------------------------------------------------------------------------
     function init() {
         //Canvas stuff
         canvas = $("#canvas")[0];
-        ctx = canvas.getContext("2d");
+        g_ctx = canvas.getContext("2d");
         canvas_width = $("#canvas").width();
         canvas_height = $("#canvas").height();
 
         //Lets save the cell width in a variable for easy control
-        cell_width = canvas_height / grid_size;
+        g_cell_size = canvas_height / GameConstants.m_grid_size;
 
         canvas.addEventListener("mousedown", function (event) {
             var rect = canvas.getBoundingClientRect();
@@ -57,40 +185,20 @@
         setTimeout(eventLoop, 40);
     }
 
-    var IsMouseClickInCell = function (grid_x, grid_y) {
-        return (mouse_x >= grid_x * cell_width
-            && mouse_x < (grid_x + 1) * cell_width
-            && mouse_y >= grid_y * cell_width
-            && mouse_y < (grid_y +1) * cell_width);
+    //--------------------------------------------------------------------------
+    var isMouseClickInCell = function (grid_x, grid_y) {
+        return (mouse_x >= grid_x * g_cell_size
+            && mouse_x < (grid_x + 1) * g_cell_size
+            && mouse_y >= grid_y * g_cell_size
+            && mouse_y < (grid_y +1) * g_cell_size);
     };
 
-    var Monster = function () {
-        this.m_grid_x = 0;
-        this.m_grid_y = 0;
-        this.m_state = 0;
 
-        this.handleMouseClick = function() {
-            if (!IsMouseClickInCell(this.m_grid_x, this.m_grid_y)) { return; }
-            this.m_state = (this.m_state + 1) % 2;
-        };
+    var GameScreen = {
 
-        this.paint = function () {
-            this.setStyle();
-            ctx.fillRect(this.m_grid_x * cell_width, this.m_grid_y * cell_width, cell_width, cell_width);
-        };
-
-        this.setStyle = function() {
-            ctx.strokeStyle = "rgb(255, 0, 0)";
-            if (this.m_state) {
-                ctx.fillStyle = "rgb(0, 255, 0)";
-            } else {
-                ctx.fillStyle = "rgb(255, 0, 0)";
-            }
-
-        }
     };
 
-    //---------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     var TitleScreen = {
 
         scratches: [],
@@ -103,20 +211,20 @@
         circle: {active: false, x: 0, y: 0},
 
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         init: function () {
             this.scratches.push({x_top: 30, x_stray: -5, age: 0, active: 100, period: 170});
             this.scratches.push({x_top: 120, x_stray: 5, age: 0, active: 150, period: 190});
             this.monsters.push(new Monster());
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+            g_ctx.textAlign = "center";
+            g_ctx.textBaseline = "middle";
 
-            this.size_upper = ctx.measureText(this.text1).width;
+            this.size_upper = g_ctx.measureText(this.text1).width;
         },
 
         //-------------------------------------------------------------------
         reset: function () {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.scratches[0].x_top = 30;
             this.scratches[0].x_stray = -5;
             this.scratches[0].age = 0;
@@ -156,22 +264,22 @@
         paint: function () {
             //Lets paint the canvas now
             //set up blank canvas
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas_width, canvas_height);
+            g_ctx.fillStyle = "white";
+            g_ctx.fillRect(0, 0, canvas_width, canvas_height);
 
             //start jitter
             jiggle_x = Math.random() * 1;
             jiggle_y = Math.random() * 1;
-            ctx.setTransform(1, 0, 0, 1, jiggle_x, jiggle_y);
+            g_ctx.setTransform(1, 0, 0, 1, jiggle_x, jiggle_y);
 
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = "rgb(0, 0, 0)";
-            ctx.fillStyle = "rgb(128, 128, 128)";
+            g_ctx.lineWidth = 5;
+            g_ctx.strokeStyle = "rgb(0, 0, 0)";
+            g_ctx.fillStyle = "rgb(128, 128, 128)";
 
             if (this.circle.active) {
-                ctx.beginPath();
-                ctx.arc(this.circle.x, this.circle.y, 20, 0, 2 * Math.PI);
-                ctx.stroke();
+                g_ctx.beginPath();
+                g_ctx.arc(this.circle.x, this.circle.y, 20, 0, 2 * Math.PI);
+                g_ctx.stroke();
             }
 
             if (this.second_countdown_timer.active) {
@@ -186,45 +294,45 @@
                 }
 
 
-                ctx.beginPath();
-                ctx.moveTo(canvas_width / 2, canvas_height / 2);
-                ctx.lineTo(canvas_width / 2, -canvas_height / 2);
+                g_ctx.beginPath();
+                g_ctx.moveTo(canvas_width / 2, canvas_height / 2);
+                g_ctx.lineTo(canvas_width / 2, -canvas_height / 2);
                 var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
-                ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
-                ctx.closePath();
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(canvas_width / 2, canvas_height / 2);
-                ctx.lineTo(canvas_width / 2, -canvas_height / 2);
+                g_ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
+                g_ctx.closePath();
+                g_ctx.fill();
+                g_ctx.beginPath();
+                g_ctx.moveTo(canvas_width / 2, canvas_height / 2);
+                g_ctx.lineTo(canvas_width / 2, -canvas_height / 2);
                 var percent_covered = 1.5 + 2 * this.second_countdown_timer.current / this.second_countdown_timer.period;
-                ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
-                ctx.closePath();
-                ctx.stroke();
+                g_ctx.arc(canvas_width / 2, canvas_height / 2, canvas_height, 1.5 * Math.PI, percent_covered * Math.PI);
+                g_ctx.closePath();
+                g_ctx.stroke();
 
-                ctx.beginPath();
-                ctx.moveTo(0, canvas_height / 2);
-                ctx.lineTo(canvas_width, canvas_height / 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(canvas_width / 2, 0);
-                ctx.lineTo(canvas_width / 2, canvas_height);
-                ctx.stroke();
+                g_ctx.beginPath();
+                g_ctx.moveTo(0, canvas_height / 2);
+                g_ctx.lineTo(canvas_width, canvas_height / 2);
+                g_ctx.stroke();
+                g_ctx.beginPath();
+                g_ctx.moveTo(canvas_width / 2, 0);
+                g_ctx.lineTo(canvas_width / 2, canvas_height);
+                g_ctx.stroke();
 
-                ctx.beginPath();
-                ctx.arc(canvas_width / 2, canvas_height / 2, 450, 0, 2 * Math.PI);
-                ctx.arc(canvas_width / 2, canvas_height / 2, 500, 0, 2 * Math.PI);
-                ctx.stroke();
+                g_ctx.beginPath();
+                g_ctx.arc(canvas_width / 2, canvas_height / 2, 450, 0, 2 * Math.PI);
+                g_ctx.arc(canvas_width / 2, canvas_height / 2, 500, 0, 2 * Math.PI);
+                g_ctx.stroke();
 
-                ctx.font = "800px Arial";
-                ctx.fillStyle = "rgb(0, 0, 0)";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(this.countdown, canvas_width / 2, canvas_height / 2);
+                g_ctx.font = "800px Arial";
+                g_ctx.fillStyle = "rgb(0, 0, 0)";
+                g_ctx.textAlign = "center";
+                g_ctx.textBaseline = "middle";
+                g_ctx.fillText(this.countdown, canvas_width / 2, canvas_height / 2);
             }
             else {
-                ctx.fillStyle = "rgb(0,0,0)";
-                ctx.font = "Bold 80px Arial";
-                ctx.fillText(this.text, canvas_width / 2, canvas_height / 2);
+                g_ctx.fillStyle = "rgb(0,0,0)";
+                g_ctx.font = "Bold 80px Arial";
+                g_ctx.fillText(this.text, canvas_width / 2, canvas_height / 2);
                 for(var m in this.monsters)
                 {
                     this.monsters[m].paint();
@@ -232,24 +340,24 @@
             }
 
             //finish jitter
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = "rgb(0, 0, 0)";
-            ctx.fillStyle = "rgb(128, 128, 128)";
+            g_ctx.lineWidth = 5;
+            g_ctx.strokeStyle = "rgb(0, 0, 0)";
+            g_ctx.fillStyle = "rgb(128, 128, 128)";
 
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.fillStyle = "rgb(0, 0, 0)";
-            ctx.globalAlpha = 0.25;
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.globalAlpha = 0.25;
             if (Math.random() < .15) {
-                ctx.globalAlpha = 0.35;
+                g_ctx.globalAlpha = 0.35;
             }
-            ctx.strokeStyle = "rgb(196, 196, 196)";
-            ctx.fillSytle = ctx.strokeStyle;
+            g_ctx.strokeStyle = "rgb(196, 196, 196)";
+            g_ctx.fillSytle = g_ctx.strokeStyle;
             for (var j = 0; j < 1; j++) {
-                ctx.beginPath();
-                ctx.arc(Math.random() * canvas_height, Math.random() * canvas_height, 2, 0, 2 * Math.PI);
-                ctx.fill();
+                g_ctx.beginPath();
+                g_ctx.arc(Math.random() * canvas_height, Math.random() * canvas_height, 2, 0, 2 * Math.PI);
+                g_ctx.fill();
             }
-            ctx.lineWidth = 1;
+            g_ctx.lineWidth = 1;
             for (var j = 0; j < 2; j++) {
                 this.scratches[j].age++;
                 if (this.scratches[j].age >= this.scratches[j].period) {
@@ -258,21 +366,21 @@
                     this.scratches[j].x_stray = Math.random() * 9 - 4.5;
                 }
                 if (this.scratches[j].age < this.scratches[j].active && this.scratches[j].age % 10 != 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(this.scratches[j].x_top, 0);
-                    ctx.lineTo(this.scratches[j].x_top + this.scratches[j].x_stray, canvas_height);
+                    g_ctx.beginPath();
+                    g_ctx.moveTo(this.scratches[j].x_top, 0);
+                    g_ctx.lineTo(this.scratches[j].x_top + this.scratches[j].x_stray, canvas_height);
                     this.scratches[j].x_top += Math.random() * 7 - 3.5;
                     this.scratches[j].x_stray += Math.random() * 2 - 1;
-                    ctx.stroke();
+                    g_ctx.stroke();
                 }
             }
-            ctx.fillStyle = "rgb(0, 0, 0)";
-            ctx.fillRect(0, 0, canvas_width, canvas_height);
-            ctx.globalAlpha = 1;
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(0, 0, canvas_width, canvas_height);
+            g_ctx.globalAlpha = 1;
         }
     };
 
-    //---------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     function eventLoop() {
         var start_time = Date.now();
 
