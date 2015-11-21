@@ -28,7 +28,9 @@
     const GameConstants = {
         m_grid_size: 10,
         m_initial_monsters: 2,
-        m_initial_cities: 3
+        m_initial_cities: 3,
+        m_initial_commands: 3,
+        m_command_size: 3
     };
 
     //--------------------------------------------------------------------------
@@ -323,6 +325,87 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
+    const MonsterSteps = {
+        MOVE_UP: {
+            m_dx: 0,
+            m_dy: -1,
+            m_rotate_left: "MOVE_LEFT",
+            m_rotate_right: "MOVE_RIGHT",
+            m_char: "\u2191"
+        },
+        MOVE_DOWN: {
+            m_dx: 1,
+            m_dy: 0,
+            m_rotate_left: "MOVE_RIGHT",
+            m_rotate_right: "MOVE_LEFT",
+            m_char: "\u2193"
+        },
+        MOVE_LEFT: {
+            m_dx: -1,
+            m_dy: 0,
+            m_rotate_left: "MOVE_DOWN",
+            m_rotate_right: "MOVE_UP",
+            m_char: "\u2190"
+        },
+        MOVE_RIGHT: {
+            m_dx: 1,
+            m_dy: 0,
+            m_rotate_left: "MOVE_UP",
+            m_rotate_right: "MOVE_DOWN",
+            m_char: "\u2192"
+        }
+    };
+    const ALL_MONSTER_STEP_TYPES = [];
+    Util.forEach(MonsterSteps, function(item) { ALL_MONSTER_STEP_TYPES.push(item); } );
+
+    //--------------------------------------------------------------------------
+    var MonsterCommand = function()
+    {
+        this.m_steps = [];
+
+        //----------------------------------------------------------------------
+        this.push = function (monster_step)
+        {
+            this.m_steps.push(monster_step);
+        };
+
+        //----------------------------------------------------------------------
+        this.rotate_left = function()
+        {
+            var new_steps = [];
+            Util.forEach(this.m_steps, function(step) {
+               new_steps.push(MonsterSteps[step.m_rotate_left]);
+            });
+            this.m_steps = new_steps;
+        };
+
+        //----------------------------------------------------------------------
+        this.rotate_right = function()
+        {
+            var new_steps = [];
+            Util.forEach(this.m_steps, function(step) {
+                new_steps.push(MonsterSteps[step.m_rotate_right]);
+            });
+            this.m_steps = new_steps;
+        };
+
+        //----------------------------------------------------------------------
+        this.paint = function(x, y)
+        {
+            var text = "";
+            Util.forEach(this.m_steps, function(step) {
+                text += step.m_char;
+            });
+
+            g_ctx.fillStyle = "rgb(0,0,0)";
+            g_ctx.font = "Bold 80px Arial";
+            g_ctx.fillText(text, x, y);
+        }
+    };
+
+    //##########################################################################
+
+    //--------------------------------------------------------------------------
     function init() {
         //Canvas stuff
         canvas = $("#canvas")[0];
@@ -370,6 +453,7 @@
         m_monsters: null,
         m_cities: null,
         m_monster_info_box: null,
+        m_available_commands: null,
 
         //----------------------------------------------------------------------
         init: function ()
@@ -414,7 +498,25 @@
                     = new City(Util.randomItem(ALL_CITY_TYPES), grid_x, grid_y);
             }
 
-            m_monster_info_box = new MonsterInfoBox();
+            this.m_monster_info_box = new MonsterInfoBox();
+
+            // initialize commands
+            this.m_available_commands = [];
+            var command_index, step_index;
+            for (command_index = 0;
+                command_index < GameConstants.m_initial_commands;
+                ++command_index)
+            {
+                var monster_command = new MonsterCommand();
+                for (step_index = 0;
+                    step_index < GameConstants.m_command_size;
+                    ++step_index)
+                {
+                    monster_command.push(Util.randomItem(ALL_MONSTER_STEP_TYPES));
+                }
+                this.m_available_commands[command_index]
+                    = monster_command;
+            }
         },
 
         //-------------------------------------------------------------------
@@ -435,11 +537,11 @@
 
             if (null != clicked_monster)
             {
-                m_monster_info_box.showNextToMonster(clicked_monster);
+                this.m_monster_info_box.showNextToMonster(clicked_monster);
             }
             else
             {
-                m_monster_info_box.hide()
+                this.m_monster_info_box.hide()
             }
         },
 
@@ -471,7 +573,7 @@
                 city.paint();
             });
 
-            m_monster_info_box.paint();
+            this.m_monster_info_box.paint();
         }
     };
 
