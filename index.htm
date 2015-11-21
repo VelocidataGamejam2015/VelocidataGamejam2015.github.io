@@ -906,11 +906,15 @@
         // from Screen
         init: function (layout)
         {
-            var grid_x, grid_y;
-
             this.m_layout = layout;
+        },
 
+        //-------------------------------------------------------------------
+        // from Screen
+        reset: function ()
+        {
             // initialize land
+            var grid_x, grid_y;
             this.m_lands = [];
             for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
             {
@@ -918,7 +922,7 @@
                 {
                     this.m_lands.push(
                         new Land(Util.randomItem(ALL_LAND_TYPES),
-                            grid_x, grid_y, layout));
+                            grid_x, grid_y, this.m_layout));
                 }
             }
 
@@ -933,7 +937,7 @@
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_monsters.push(
                     new Monster(Util.randomItem(ALL_MONSTER_TYPES),
-                        grid_x, grid_y, layout));
+                        grid_x, grid_y, this.m_layout));
             }
 
             // initialize cities
@@ -947,13 +951,13 @@
                 grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
                 this.m_cities.push(
                     new City(Util.randomItem(ALL_CITY_TYPES),
-                        grid_x, grid_y, layout));
+                        grid_x, grid_y, this.m_layout));
             }
 
-            this.m_monster_info_box = new MonsterInfoBox(layout);
+            this.m_monster_info_box = new MonsterInfoBox(this.m_layout);
 
             // initialize commands
-            this.m_command_tray = new CommandTray(layout);
+            this.m_command_tray = new CommandTray(this.m_layout);
             var command_index, step_index;
             for (command_index = 0;
                 command_index < GameConstants.m_initial_commands;
@@ -965,16 +969,11 @@
                     ++step_index)
                 {
                     monster_command.push(
-                        Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
+                        Util.randomItem(ALL_MONSTER_STEP_TYPES), this.m_layout);
                 }
                 this.m_command_tray.enqueue(monster_command);
             }
         },
-
-        //-------------------------------------------------------------------
-        // from Screen
-        reset: function ()
-        {},
 
         //-------------------------------------------------------------------
         // from Screen
