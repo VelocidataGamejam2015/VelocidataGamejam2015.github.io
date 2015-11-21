@@ -579,17 +579,17 @@
             g_ctx.drawImage(
                 this.m_image,
                 this.m_layout.m_grid_x_offset
-                    + this.m_grid_x * this.m_layout.m_cell_size
+                    + (this.m_grid_x - 1) * this.m_layout.m_cell_size
                     + this.m_x_shift
                     + diff
                     + this.m_real_width_offset,
                 this.m_layout.m_grid_y_offset
-                    + this.m_grid_y * this.m_layout.m_cell_size
+                    + (this.m_grid_y - 1) * this.m_layout.m_cell_size
                     + this.m_y_shift
                     + 2 * diff
                     + this.m_real_height_offset,
-                this.m_real_width - diff * 2,
-                this.m_real_height - diff * 2
+                this.m_real_width * 3 - diff * 2,
+                this.m_real_height * 3 - diff * 2
             );
             if (this.m_asleep && this.m_z_age >= 0)
             {
