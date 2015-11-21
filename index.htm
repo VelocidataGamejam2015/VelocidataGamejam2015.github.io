@@ -310,6 +310,7 @@
         this.m_layout = layout;
         
         this.m_move_percent = 0;
+        this.m_is_valid_step = false;
 
         this.m_image = this.m_type.m_image;
         this.m_name = this.m_type.m_name;
@@ -341,7 +342,42 @@
         this.giveCommand = function(command)
         {
             this.m_commands.push(command);
+            if (this.m_asleep)
+            {
+                this.beginNextStep();
+            }
             this.m_asleep = false;
+        };
+
+        //----------------------------------------------------------------------
+        this.beginNextStep = function()
+        {
+            this.m_is_valid_step
+                = this.isValidStep(this.m_commands[0].m_steps[0]);
+        };
+
+        //----------------------------------------------------------------------
+        this.isValidStep = function(monster_step)
+        {
+            if (0 == this.m_grid_x && monster_step.m_dx < 0)
+            {
+                return false;
+            }
+            if (GameConstants.m_grid_size - 1 == this.m_grid_x
+                && monster_step.m_dx > 0)
+            {
+                return false;
+            }
+            if (0 == this.m_grid_y && monster_step.m_dy < 0)
+            {
+                return false;
+            }
+            if (GameConstants.m_grid_size - 1 == this.m_grid_y
+                && monster_step.m_dy > 0)
+            {
+                return false;
+            }
+            return true;
         };
 
         //----------------------------------------------------------------------
@@ -395,23 +431,10 @@
                     this.m_move_percent = 0;
 
                     // move to next cell
-                    this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
-                    this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
-                    if (this.m_grid_x < 0)
+                    if (this.m_is_valid_step)
                     {
-                        this.m_grid_x = 0;
-                    }
-                    if (this.m_grid_x >= GameConstants.m_grid_size)
-                    {
-                        this.m_grid_x = GameConstants.m_grid_size - 1;
-                    }
-                    if (this.m_grid_y < 0)
-                    {
-                        this.m_grid_y = 0;
-                    }
-                    if (this.m_grid_y >= GameConstants.m_grid_size)
-                    {
-                        this.m_grid_y = GameConstants.m_grid_size - 1;
+                        this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
+                        this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
                     }
 
                     // remove step
@@ -424,6 +447,10 @@
                             this.m_asleep = true;
                             this.m_z_age = this.Z_AGE_INITIAL_VALUE;
                         }
+                    }
+                    if (!this.m_asleep)
+                    {
+                        this.beginNextStep();
                     }
                 }
             }
@@ -442,7 +469,13 @@
             var y_shift = 0;
             if (!this.m_asleep)
             {
-                var shift = this.m_move_percent / 100 * this.m_layout.m_cell_size;
+                var move_percent = this.m_move_percent;
+                if (!this.m_is_valid_step && move_percent > 50)
+                {
+                    move_percent = 100 - move_percent;
+                }
+                var shift = move_percent / 100 * this.m_layout.m_cell_size;
+
                 x_shift = this.m_commands[0].m_steps[0].m_dx * shift;
                 y_shift = this.m_commands[0].m_steps[0].m_dy * shift;
             }
@@ -673,8 +706,8 @@
             m_char: " \u2191 "
         },
         MOVE_DOWN: {
-            m_dx: 1,
-            m_dy: 0,
+            m_dx: 0,
+            m_dy: 1,
             m_rotate_left: "MOVE_RIGHT",
             m_rotate_right: "MOVE_LEFT",
             m_char: " \u2193 "
