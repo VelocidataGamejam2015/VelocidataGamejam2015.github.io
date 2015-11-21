@@ -332,6 +332,7 @@
         this.m_font = this.m_text_height + "px Arial";
         this.m_name = "Undefined";
         this.m_blinker_age = 0;
+        this.m_blinker_cycle = 30;
 
         //----------------------------------------------------------------------
         this.hide = function()
@@ -372,7 +373,7 @@
         //----------------------------------------------------------------------
         this.paintline = function (text, line, lastline)
         {
-            if(lastline && this.m_blinker_age > 10)
+            if(lastline && this.m_blinker_age > this.m_blinker_cycle/2)
             {
                 text += " _";
             }
@@ -417,7 +418,7 @@
                 this.m_pos_x + 5,
                 this.m_pos_y + this.m_banner_height/2
             );
-            this.m_blinker_age = (this.m_blinker_age + 1) % 20;
+            this.m_blinker_age = (this.m_blinker_age + 1) % this.m_blinker_cycle;
             this.paintline("> up", 1, false);
             this.paintline("> right", 2, true);
         };
