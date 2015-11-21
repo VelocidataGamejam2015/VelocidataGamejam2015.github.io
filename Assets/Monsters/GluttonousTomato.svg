@@ -9,13 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 744.09448819 1052.3622047"
+   width="295.38309mm"
+   height="184.72646mm"
+   viewBox="0 0 1046.633 654.54256"
    id="svg4826"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="GluttonousTomato.svg">
+   sodipodi:docname="GluttonousTomato.svg"
+   inkscape:export-filename="C:\Users\Shep\Documents\GitHub\VelocidataGamejam2015.github.io\Assets\Monsters\S_GluttonousTomato.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4828" />
   <sodipodi:namedview
@@ -26,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="24.573545"
-     inkscape:cy="410.12201"
+     inkscape:cx="259.16578"
+     inkscape:cy="298.63984"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -35,7 +38,11 @@
      inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
   <metadata
      id="metadata4831">
     <rdf:RDF>
@@ -51,9 +58,10 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(234.59223,-286.33748)">
     <path
-       style="fill:#d40000;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:#d40000;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 806.01999,674.37134 c -22.88049,-261.82256 -298.46987,-309.24337 -350,-309.28571 -51.53014,-0.0423 -102.39769,-6.65659 -167.29571,8.71324 -64.89802,-16.66468 -115.76557,-10.05039 -167.29571,-10.00809 -51.530133,0.0423 -327.11951,47.46315 -350,309.28571 -22.88049,261.82257 341.76064,285.03937 517.29571,248.50456 175.53507,37.82966 540.1762,14.61286 517.29571,-247.20971 z"
        id="path5374-6"
        inkscape:connector-curvature="0"
@@ -71,13 +79,13 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#89a02c;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:#89a02c;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 114.14724,362.42802 c 30.47375,2.76043 64.99704,2.28123 82.83251,15.15228 8.43447,9.42442 -15.38248,26.01582 -29.29443,40.40611 22.58077,-8.46873 37.09599,-23.38989 71.72083,-22.22336 27.83674,19.26713 32.63023,48.13561 28.28427,80.8122 14.21544,-34.66724 27.28874,-69.56292 67.68023,-98.99495 27.27412,-0.84049 54.54823,0.066 81.82235,15.15229 -8.12485,-9.42809 -26.03728,-18.85618 -22.22335,-28.28427 l 21.2132,-2.0203 c -51.25468,-8.78307 -88.85844,-7.36635 -131.23875,0.43346 -59.0979,-11.06254 -123.29786,-11.28553 -170.79686,-0.43346 z"
        id="path5406"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccccccc" />
     <path
-       style="fill:#677821;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:#677821;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 284.86302,362.42802 c 14.63861,-23.74093 8.58892,-53.12413 49.49747,-69.70053 7.01737,14.45447 27.33002,18.27272 47.47717,22.22336 -51.47856,4.33352 -71.01668,27.83129 -96.97464,47.47717 z"
        id="path5408"
        inkscape:connector-curvature="0"
