@@ -86,12 +86,15 @@
     };
 
     //--------------------------------------------------------------------------
-    var Monster = function (monster_type)
-    {
+    var Monster = function (monster_type) {
         this.m_type = monster_type;
         this.m_grid_x = 0;
         this.m_grid_y = 0;
         this.m_state = 0;
+        this.image = new Image();
+        this.ready = false;
+        this.image.src = "Assets/Monsters/RedMonster.png";
+        this.loop = 0;
 
         //----------------------------------------------------------------------
         /** Returns true if the click was handled. */
@@ -106,8 +109,20 @@
 
         //----------------------------------------------------------------------
         this.paint = function () {
-            this.setStyle();
-            g_ctx.fillRect(this.m_grid_x * g_cell_size, this.m_grid_y * g_cell_size, g_cell_size, g_cell_size);
+            this.loop = (this.loop+1) % 50
+            diff = this.loop / 5;
+            if(diff > 5)
+            {
+                diff = 10 - diff
+            }
+            g_ctx.drawImage
+            (
+                this.image,
+                this.m_grid_x * g_cell_size + diff,
+                this.m_grid_y * g_cell_size + diff,
+                g_cell_size - diff * 2,
+                g_cell_size - diff * 2
+            );
         };
 
         //----------------------------------------------------------------------
