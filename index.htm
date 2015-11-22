@@ -321,43 +321,57 @@
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_GluttonousTomato.png",
                 ResourceTracker),
-            m_name: "GluttonousTomato.txt"
+            m_name: "GluttonousTomato.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/yum_yam_yum.wav",
+                ResourceTracker)
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_LustyCarrot.png",
                 ResourceTracker),
-            m_name: "LustyCarrot.txt"
+            m_name: "LustyCarrot.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/lust1.wav",
+                ResourceTracker)
         },
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_GreedyCelery.png",
                 ResourceTracker),
-            m_name: "GreedyCelery.txt"
+            m_name: "GreedyCelery.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/gimme_gimme.wav",
+                ResourceTracker)
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_PridefulEggplant.png",
                 ResourceTracker),
-            m_name: "PridefulEggplant.txt"
+            m_name: "PridefulEggplant.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/rawr_short.wav",
+                ResourceTracker)
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_WrathfulPepper.png",
                 ResourceTracker),
-            m_name: "WrathfulPepper.txt"
+            m_name: "WrathfulPepper.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/wrath1.wav",
+                ResourceTracker)
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_EnviousBroccoli.png",
                 ResourceTracker),
-            m_name: "EnviousBroccoli.txt"
+            m_name: "EnviousBroccoli.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/rawr1.wav",
+                ResourceTracker)
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_SlothfulPotato.png",
                 ResourceTracker),
-            m_name: "SlothfulPotato.txt"
+            m_name: "SlothfulPotato.txt",
+            m_command_sound: Util.loadAudio("Assets/Sound/sloth1.wav",
+                ResourceTracker)
         }
     };
     const ALL_MONSTER_TYPES = [];
@@ -395,6 +409,10 @@
         //----------------------------------------------------------------------
         this.giveCommand = function(command)
         {
+            if (null != this.m_type.m_command_sound)
+            {
+                this.m_type.m_command_sound.play();
+            }
             this.m_commands.push(command);
             if (this.m_asleep)
             {
@@ -1202,7 +1220,7 @@
               }
               AudioComponents.m_bg.play();
             }
-            else if (50 == key_code) //20
+            else if (50 == key_code) // 2
             {
               //start background music loop
               AudioComponents.m_bg.loop().play();
