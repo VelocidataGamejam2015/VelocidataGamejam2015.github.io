@@ -247,13 +247,17 @@
 
         //----------------------------------------------------------------------
         onAllLoaded: function() {
-            switchToScreen(GameScreen);
+            switchToScreen(SplashScreen);
         }
     };
 
     //--------------------------------------------------------------------------
     var AudioComponents = {
         m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav",
+            ResourceTracker),
+        m_begin_game: Util.loadAudio("Assets/Sound/dramatic_tone.wav",
+            ResourceTracker),
+        m_bad_key: Util.loadAudio("Assets/Sound/down1.wav",
             ResourceTracker),
         m_new_city_1: Util.loadAudio("Assets/Sound/city_sounds_short.wav",
             ResourceTracker),
@@ -780,6 +784,7 @@
         this.m_name = "Undefined";
         this.m_blinker_age = 0;
         this.m_blinker_cycle = 30;
+        this.m_max_lines = 4;
 
         //----------------------------------------------------------------------
         this.hide = function()
@@ -819,7 +824,7 @@
         };
 
         //----------------------------------------------------------------------
-        this.paintline = function (text, line, is_last_line)
+        this.paintLine = function (text, line, is_last_line)
         {
             if (is_last_line && this.m_blinker_age > this.m_blinker_cycle / 2)
             {
@@ -884,14 +889,18 @@
 
             var command_index;
             for (command_index = 0;
-                command_index < this.m_active_monster.m_commands.length;
+                command_index < this.m_active_monster.m_commands.length
+                && command_index < this.m_max_lines;
                 ++command_index)
             {
-                this.paintline("> "
+                this.paintLine("> "
                     + this.m_active_monster.m_commands[command_index].getText(),
                     command_index + 1, false);
             }
-            this.paintline(">", command_index + 1, true);
+            if (command_index < this.m_max_lines)
+            {
+                this.paintLine(">", command_index + 1, true);
+            }
         };
     };
 
@@ -1052,6 +1061,7 @@
         this.shake = function ()
         {
             this.m_shake = 3 * 2 * Math.PI;
+            AudioComponents.m_bad_key.play();
         };
 
         //----------------------------------------------------------------------
@@ -1277,10 +1287,14 @@
             {
                 this.m_command_tray.addCommand();
             }
+
+            // start background music loop
+            AudioComponents.m_bg.loop().play();
         },
 
         //-------------------------------------------------------------------
-        initializeRemainingMonsterTypes: function() {
+        initializeRemainingMonsterTypes: function()
+        {
             // start with one of each type
             var monster_types = [].concat(ALL_MONSTER_TYPES);
             var num_types = monster_types.length;
@@ -1464,7 +1478,6 @@
         },
 
         //----------------------------------------------------------------------
-        // from GameObject
         paintHelp: function ()
         {
             g_ctx.fillStyle = "rgb(192,192,192)";
@@ -1722,6 +1735,125 @@
     };
 
     //##########################################################################
+
+    //--------------------------------------------------------------------------
+    // implements Screen
+    var SplashScreen = {
+        m_layout: null,
+        m_splash_image: null,
+        m_spash_width: 1024,
+        m_spash_height: 786,
+
+        m_alpha_delta: 0,
+        m_alpha: 1,
+
+        //----------------------------------------------------------------------
+        // from Screen
+        init: function (layout)
+        {
+            this.m_layout = layout;
+            this.m_splash_image = Util.loadImage(
+                "Assets/Misc/TitleScreen.png", ResourceTracker);
+        },
+
+        //-------------------------------------------------------------------
+        // from Screen
+        reset: function ()
+        {},
+
+        //-------------------------------------------------------------------
+        // from Screen
+        handleMouseClick: function ()
+        {
+            //alert(mouse_x + ", " + mouse_y);
+            if (1 == this.m_alpha
+                && mouse_x > 327
+                && mouse_x < 573
+                && mouse_y > 450
+                && mouse_y < 650)
+            {
+                AudioComponents.m_begin_game.play();
+                this.m_alpha_delta = -0.015
+            }
+        },
+
+        //-------------------------------------------------------------------
+        // from Screen
+        handleKeyPress: function ()
+        {
+        },
+
+        //----------------------------------------------------------------------
+        // from Screen
+        handleTimeStep: function ()
+        {
+            this.m_alpha += this.m_alpha_delta;
+            if (this.m_alpha <= 0)
+            {
+                switchToScreen(GameScreen);
+            }
+        },
+
+        //----------------------------------------------------------------------
+        // from Screen
+        paint: function ()
+        {
+            // paint the background
+            g_ctx.setTransform(1, 0, 0, 1, 0, 0);
+            g_ctx.fillStyle = "rgb(0, 0, 0)";
+            g_ctx.fillRect(
+                0, 0,
+                this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
+
+            // assumes splash is wider than high and canvas is square
+            var effective_width = this.m_layout.m_canvas_width;
+            var effective_height = this.m_spash_height * effective_width
+                / this.m_spash_width;
+
+            var x_origin = (this.m_layout.m_canvas_width - effective_width) / 2 ;
+            var y_origin = (this.m_layout.m_canvas_height - effective_height) / 2 ;
+            g_ctx.globalAlpha = this.m_alpha;
+            g_ctx.drawImage(
+                this.m_splash_image,
+                0, 0,
+                //x_origin,
+                //y_origin,
+                effective_width,
+                effective_height);
+
+            g_ctx.fillStyle = "rgb(192,192,192)";
+
+            x_origin = this.m_layout.m_canvas_width / 2 ;
+            g_ctx.font = "20px Arial";
+            g_ctx.fillText(
+                "Developed in 48 hours by:"
+                + " Alex S., (?), Alex S.J., Erik,",
+                // Alex's wife
+                x_origin, 700
+            );
+            g_ctx.fillText(
+                "Joe, Louis, Michael, Saptenshi, and Terry",
+                x_origin, 730
+            );
+            g_ctx.fillText(
+                "Artistic Inspiration by: Emily, Ethan, Katie, (?), and (?)",
+                // Terry's son, Erik's son
+                x_origin, 760
+            );
+            g_ctx.fillText(
+                "Thanks to Barry, Michelle, Ron, and Vanessa",
+                x_origin, 810
+            );
+            g_ctx.fillText(
+                " for supporting us and putting up with us",
+                x_origin, 840
+            );
+
+            g_ctx.globalAlpha = 1;
+        }
+    };
+
+    //##########################################################################
     // game engine
 
     //--------------------------------------------------------------------------
@@ -1769,6 +1901,7 @@
         // can't do this until you've set up canvas_width and canvas_height
         ResourceTracker.init(layout);
         GameScreen.init(layout);
+        SplashScreen.init(layout);
 
         switchToScreen(ResourceTracker);
 
