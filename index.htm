@@ -37,6 +37,7 @@
         m_command_size: 3,
         m_command_tray_height: 100,
         m_countdown_to_next_command_height: 10,
+        m_command_refresh_speed: 1.0,
         m_max_num_commands: 9,
         m_max_initial_placement_tries: 100,
         m_top_space: 75,
@@ -959,7 +960,7 @@
             if (this.m_shake > 0) {
                 this.m_shake -= Math.PI * 2 / 3;
             }
-            this.m_countdown_to_next_command_progress += 0.25;
+            this.m_countdown_to_next_command_progress += GameConstants.m_command_refresh_speed;
 
             if (this.m_countdown_to_next_command_progress >= 100)
             {
