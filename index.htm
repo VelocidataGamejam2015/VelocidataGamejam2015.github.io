@@ -526,6 +526,7 @@
                             if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
                                 // monster eats the city - Remove the city from the screen
                                 GameScreen.m_cities.splice(city_index, 1);
+                                Game.m_total_score += 1;
                                 AudioComponents.m_crush_city.play();
                                 break;
                             }
@@ -1017,6 +1018,16 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
+    var Game = {
+        m_total_score: null,
+
+        init: function()
+        {
+            this.m_total_score = 0;
+        }
+    };
+
+    //--------------------------------------------------------------------------
     // implements Screen
     var GameScreen = {
         m_lands: null,
@@ -1363,6 +1374,13 @@
             this.m_monster_info_box.paint();
 
             this.m_command_tray.paint();
+
+            g_ctx.font = "28px Arial";
+            g_ctx.fillStyle = "rgb(192,192,192)";
+            g_ctx.fillText(
+                    "Score: " + Game.m_total_score.toString(),
+                    10, 18
+            );
         }
     };
 
@@ -1414,6 +1432,9 @@
         // can't do this until you've set up canvas_width and canvas_height
         ResourceTracker.init(layout);
         GameScreen.init(layout);
+
+        // initialize game variables
+        Game.init();
 
         switchToScreen(ResourceTracker);
 
