@@ -6,17 +6,11 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js" type="text/javascript"></script>
 </head>
-<body style="background-color: black;">
+<body style="background-color: black; position: absolute; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%);">
 <canvas tabindex='1' id="canvas" width="900" height="900"></canvas>
 <script>
     //##########################################################################
     // The game
-
-    //window.setTimeout(endGame, 72000);
-
-    function endGame() {
-        alert('TIME UP ;(');
-    }
 
     var g_canvas;
     var g_ctx;
@@ -82,7 +76,9 @@
 
     //--------------------------------------------------------------------------
     // interface, for reference, not enforced
-    const Screen_ = { // Screen is already declared and this is for reference anyway
+    // The name is funny because Screen is already declared
+    // and this is just for reference anyway
+    const Screen_ = {
         init: function (layout) {},
         reset: function () {},
         handleMouseClick: function () {},
@@ -93,6 +89,7 @@
 
     //--------------------------------------------------------------------------
     const Util = {
+
         //----------------------------------------------------------------------
         forEach: function (obj, fn)
         {
@@ -113,7 +110,8 @@
         },
 
         //----------------------------------------------------------------------
-        shuffle: function (arr) {
+        shuffle: function (arr)
+        {
             var current_index = arr.length, temp, random_index;
             while (0 != current_index)
             {
@@ -130,7 +128,8 @@
         },
 
         //----------------------------------------------------------------------
-        isMouseClickInCell: function (grid_x, grid_y, layout) {
+        isMouseClickInCell: function (grid_x, grid_y, layout)
+        {
             return (mouse_x >= layout.m_grid_x_offset
                 + grid_x * layout.m_cell_size
             && mouse_x < layout.m_grid_x_offset
@@ -142,10 +141,11 @@
         },
 
         //----------------------------------------------------------------------
-        loadImage: function (url, resource_tracker) {
+        loadImage: function (url, resource_tracker)
+        {
             var image = new Image();
             resource_tracker.add();
-            image.onload = function(event) {
+            image.onload = function (event) {
                 resource_tracker.onload(event);
             };
             image.src = url;
@@ -153,7 +153,8 @@
         },
 
         //----------------------------------------------------------------------
-        loadAudio: function (url, resource_tracker) {
+        loadAudio: function (url, resource_tracker)
+        {
             var audio = new buzz.sound(
               url, {
               //formats: [ "wav" ],
@@ -162,7 +163,7 @@
               loop: false
             });
             resource_tracker.add();
-            audio.bindOnce("canplay", function(event) {
+            audio.bindOnce("canplay", function (event) {
                 resource_tracker.onload(event)
             });
             return audio;
@@ -214,15 +215,15 @@
             // paint the background
             g_ctx.fillStyle = "rgb(0, 0, 0)";
             g_ctx.fillRect(
-                    0, 0,
-                    this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
+                0, 0,
+                this.m_layout.m_canvas_width,
+                this.m_layout.m_canvas_height);
 
             g_ctx.font="Bold 80px Arial";
             g_ctx.fillStyle = "rgb(128, 128, 128)";
             g_ctx.textAlign = "center";
             g_ctx.textBaseline = "middle";
-            g_ctx.fillText
-            (
+            g_ctx.fillText(
                 Math.floor(100 * this.m_loaded / this.m_added) + "%",
                 this.m_layout.m_canvas_width / 2,
                 this.m_layout.m_canvas_height / 2
@@ -231,13 +232,15 @@
 
 
         //----------------------------------------------------------------------
-        add: function() {
+        add: function ()
+        {
             ++this.m_added;
         },
 
         //----------------------------------------------------------------------
         // from Image.onload
-        onload: function (event) {
+        onload: function (event)
+        {
             ++this.m_loaded;
             if (this.m_loaded == this.m_added)
             {
@@ -246,7 +249,8 @@
         },
 
         //----------------------------------------------------------------------
-        onAllLoaded: function() {
+        onAllLoaded: function ()
+        {
             switchToScreen(SplashScreen);
         }
     };
@@ -342,7 +346,7 @@
         }
     };
     const ALL_LAND_TYPES = [];
-    Util.forEach(LandTypes, function(item) { ALL_LAND_TYPES.push(item); } );
+    Util.forEach(LandTypes, function (item) { ALL_LAND_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     // implements GameObject
@@ -357,7 +361,7 @@
 
         //----------------------------------------------------------------------
         // from GameObject
-        this.isClicked = function()
+        this.isClicked = function ()
         {};
 
         //----------------------------------------------------------------------
@@ -451,7 +455,7 @@
         }
     };
     const ALL_MONSTER_TYPES = [];
-    Util.forEach(MonsterTypes, function(item) { ALL_MONSTER_TYPES.push(item); } );
+    Util.forEach(MonsterTypes, function (item) { ALL_MONSTER_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     // implements GameObject
@@ -483,7 +487,7 @@
         this.m_z_y = 0;
 
         //----------------------------------------------------------------------
-        this.giveCommand = function(command)
+        this.giveCommand = function (command)
         {
             if (null != this.m_type.m_command_sound)
             {
@@ -498,14 +502,14 @@
         };
 
         //----------------------------------------------------------------------
-        this.beginNextStep = function()
+        this.beginNextStep = function ()
         {
             this.m_is_valid_step
                 = this.isValidStep(this.m_commands[0].m_steps[0]);
         };
 
         //----------------------------------------------------------------------
-        this.isValidStep = function(monster_step)
+        this.isValidStep = function (monster_step)
         {
             if (0 == this.m_grid_x && monster_step.m_dx < 0)
             {
@@ -530,7 +534,7 @@
 
         //----------------------------------------------------------------------
         // from GameObject
-        this.isClicked = function()
+        this.isClicked = function ()
         {
             return (
                 mouse_x >= this.m_layout.m_grid_x_offset
@@ -714,7 +718,7 @@
         }
     };
     const ALL_CITY_TYPES = [];
-    Util.forEach(CityTypes, function(item) { ALL_CITY_TYPES.push(item); } );
+    Util.forEach(CityTypes, function (item) { ALL_CITY_TYPES.push(item); } );
 
     //--------------------------------------------------------------------------
     // implements GameObject
@@ -787,13 +791,13 @@
         this.m_max_lines = 4;
 
         //----------------------------------------------------------------------
-        this.hide = function()
+        this.hide = function ()
         {
           this.m_visible = false;
         };
 
         //----------------------------------------------------------------------
-        this.showNextToMonster = function(monster)
+        this.showNextToMonster = function (monster)
         {
             this.m_name = monster.m_name;
             this.m_active_monster = monster;
@@ -814,8 +818,9 @@
             if (this.m_pos_y + this.m_height > this.m_layout.m_grid_size)
             {
                 // position against bottom edge of the monster
-                this.m_pos_y = (monster.m_grid_y + 1) * this.m_layout.m_cell_size
-                   - .125 * this.m_layout.m_cell_size - this.m_height;
+                this.m_pos_y
+                    = (monster.m_grid_y + 1) * this.m_layout.m_cell_size
+                        - .125 * this.m_layout.m_cell_size - this.m_height;
             }
 
             this.m_pos_x += this.m_layout.m_grid_x_offset;
@@ -938,13 +943,13 @@
         }
     };
     const ALL_MONSTER_STEP_TYPES = [];
-    Util.forEach(MonsterSteps, function(item) { ALL_MONSTER_STEP_TYPES.push(item); } );
+    Util.forEach(MonsterSteps, function (item) { ALL_MONSTER_STEP_TYPES.push(item); } );
     const MonsterUtil = {
         m_baby_image: Util.loadImage("Assets/Misc/S_Heart.png", ResourceTracker)
     };
 
     //--------------------------------------------------------------------------
-    var MonsterCommand = function(layout)
+    var MonsterCommand = function (layout)
     {
         this.m_steps = [];
         this.m_layout = layout;
@@ -956,27 +961,27 @@
         };
 
         //----------------------------------------------------------------------
-        this.rotateLeft = function()
+        this.rotateLeft = function ()
         {
             var new_steps = [];
-            Util.forEach(this.m_steps, function(step) {
+            Util.forEach(this.m_steps, function (step) {
                new_steps.push(MonsterSteps[step.m_rotate_left]);
             });
             this.m_steps = new_steps;
         };
 
         //----------------------------------------------------------------------
-        this.rotateRight = function()
+        this.rotateRight = function ()
         {
             var new_steps = [];
-            Util.forEach(this.m_steps, function(step) {
+            Util.forEach(this.m_steps, function (step) {
                 new_steps.push(MonsterSteps[step.m_rotate_right]);
             });
             this.m_steps = new_steps;
         };
 
         //----------------------------------------------------------------------
-        this.getText = function()
+        this.getText = function ()
         {
             var text = "";
             Util.forEach(this.m_steps, function (step)
@@ -987,7 +992,7 @@
         };
 
         //----------------------------------------------------------------------
-        this.paint = function(x, y)
+        this.paint = function (x, y)
         {
             g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.font = "Bold 20px Arial";
@@ -999,7 +1004,7 @@
 
     //--------------------------------------------------------------------------
     // implements GameObject
-    var CommandTray = function(layout)
+    var CommandTray = function (layout)
     {
         this.m_commands = [];
         this.m_shake = 0;
@@ -1042,17 +1047,17 @@
         };
 
         //----------------------------------------------------------------------
-        this.rotateLeft = function()
+        this.rotateLeft = function ()
         {
-            Util.forEach(this.m_commands, function(command) {
+            Util.forEach(this.m_commands, function (command) {
                 command.rotateLeft();
             });
         };
 
         //----------------------------------------------------------------------
-        this.rotateRight = function()
+        this.rotateRight = function ()
         {
-            Util.forEach(this.m_commands, function(command) {
+            Util.forEach(this.m_commands, function (command) {
                 command.rotateRight();
             });
         };
@@ -1073,10 +1078,12 @@
         // from GameObject
         this.handleTimeStep = function ()
         {
-            if (this.m_shake > 0) {
+            if (this.m_shake > 0)
+            {
                 this.m_shake -= Math.PI * 2 / 3;
             }
-            this.m_countdown_to_next_command_progress += GameConstants.m_command_refresh_speed;
+            this.m_countdown_to_next_command_progress
+                += GameConstants.m_command_refresh_speed;
 
             if (this.m_countdown_to_next_command_progress >= 100)
             {
@@ -1094,15 +1101,17 @@
 
         //----------------------------------------------------------------------
         // from GameObject
-        this.paint = function()
+        this.paint = function ()
         {
             var layout = this.m_layout;
             var x_offset = layout.m_grid_x_offset + layout.m_cell_size / 2;
             var y_offset = layout.m_command_tray_y_offset
-                + (GameConstants.m_command_tray_height - GameConstants.m_countdown_to_next_command_height) / 2;
+                + (GameConstants.m_command_tray_height
+                    - GameConstants.m_countdown_to_next_command_height) / 2;
 
             var shake_offset = 0;
-            if (this.m_shake > 0) {
+            if (this.m_shake > 0)
+            {
                 shake_offset = Math.sin(this.m_shake) * 5;
                 x_offset += shake_offset;
             }
@@ -1110,7 +1119,8 @@
             g_ctx.fillStyle = "rgb(0, 0, 0)";
             g_ctx.fillRect(
                 0, this.m_layout.m_command_tray_y_offset,
-                this.m_layout.m_canvas_width, GameConstants.m_command_tray_height);
+                this.m_layout.m_canvas_width,
+                GameConstants.m_command_tray_height);
             g_ctx.strokeStyle = "rgb(255, 255, 255)";
             g_ctx.strokeRect(
                 shake_offset + this.m_layout.m_grid_x_offset,
@@ -1122,10 +1132,11 @@
             g_ctx.fillRect(
                 shake_offset + this.m_layout.m_grid_x_offset,
                 this.m_layout.m_countdown_to_next_command_offset_y + 6,
-                this.m_layout.m_grid_size * this.m_countdown_to_next_command_progress / 100.0,
+                this.m_layout.m_grid_size
+                    * this.m_countdown_to_next_command_progress / 100.0,
                 GameConstants.m_countdown_to_next_command_height);
 
-            Util.forEach(this.m_commands, function(command) {
+            Util.forEach(this.m_commands, function (command) {
                command.paint(x_offset, y_offset);
                 x_offset += layout.m_cell_size
             });
@@ -1135,22 +1146,20 @@
     //##########################################################################
 
     //--------------------------------------------------------------------------
-    var Score = function(layout)
+    var Score = function (layout)
     {
         this.m_total_score = 0;
         this.m_layout = layout;
 
         //----------------------------------------------------------------------
         // from GameObject
-        this.isClicked = function()
-        {
-        };
+        this.isClicked = function ()
+        {};
 
         //----------------------------------------------------------------------
         // from GameObject
         this.handleTimeStep = function ()
-        {
-        };
+        {};
 
         //----------------------------------------------------------------------
         // from GameObject
@@ -1193,7 +1202,7 @@
             this.m_layout = layout;
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         reset: function ()
         {
@@ -1231,8 +1240,10 @@
                 var tries = 0;
                 while (true)
                 {
-                    grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-                    grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
+                    grid_x = Math.floor(Math.random()
+                        * GameConstants.m_grid_size);
+                    grid_y = Math.floor(Math.random()
+                        * GameConstants.m_grid_size);
                     if (this.canPlaceCityAtGrid(grid_x, grid_y))
                     {
                         break;
@@ -1292,8 +1303,8 @@
             AudioComponents.m_bg.loop().play();
         },
 
-        //-------------------------------------------------------------------
-        initializeRemainingMonsterTypes: function()
+        //----------------------------------------------------------------------
+        initializeRemainingMonsterTypes: function ()
         {
             // start with one of each type
             var monster_types = [].concat(ALL_MONSTER_TYPES);
@@ -1319,12 +1330,12 @@
             this.m_remaining_monster_types = monster_types;
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         handleMouseClick: function ()
         {
             var clicked_monster = null;
-            Util.forEach(this.m_monsters, function(monster) {
+            Util.forEach(this.m_monsters, function (monster) {
                 if (monster.isClicked())
                 {
                     clicked_monster = monster;
@@ -1345,18 +1356,16 @@
             }
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         handleKeyPress: function ()
         {
             if (49 == key_code) // 1
             {
-                // start background music loop
                 AudioComponents.m_bg.loop().play();
             }
             else if (50 == key_code) // 2
             {
-              // start background music loop
               AudioComponents.m_bg.stop();
             }
             else if (51 == key_code) // 3
@@ -1391,15 +1400,15 @@
         // from Screen
         handleTimeStep: function ()
         {
-            Util.forEach(this.m_lands, function(land){
+            Util.forEach(this.m_lands, function (land) {
                 land.handleTimeStep();
             });
 
-            Util.forEach(this.m_monsters, function(monster){
+            Util.forEach(this.m_monsters, function (monster) {
                 monster.handleTimeStep();
             });
 
-            Util.forEach(this.m_cities, function(city){
+            Util.forEach(this.m_cities, function (city) {
                 city.handleTimeStep();
             });
 
@@ -1407,7 +1416,7 @@
 
             this.m_command_tray.handleTimeStep();
 
-            this.handleSpawnCityTimeStep()
+            this.handleSpawnCityTimeStep();
 
             this.handleBabyMonstersTimeStep()
         },
@@ -1425,14 +1434,14 @@
 
             this.paintHelp();
 
-            Util.forEach(this.m_lands, function(land){
+            Util.forEach(this.m_lands, function (land) {
                 land.paint();
             });
 
             var paintables = [];
             paintables = paintables.concat(
                 this.m_mountains, this.m_cities, this.m_monsters);
-            paintables.sort(function(left, right) {
+            paintables.sort(function (left, right) {
 
                 var left_y = left.m_grid_y + left.m_z_order_y_boost;
                 var right_y = right.m_grid_y + right.m_z_order_y_boost;
@@ -1464,7 +1473,7 @@
                 return 0;
             });
 
-            Util.forEach(paintables, function(paintable){
+            Util.forEach(paintables, function (paintable) {
                 paintable.paint(PAINT_OVERLAY_IF_AVAILABLE);
             });
 
@@ -1508,7 +1517,7 @@
         //----------------------------------------------------------------------
         paintBabyMonsters: function ()
         {
-            Util.forEach(this.m_baby_monsters, function(baby) {
+            Util.forEach(this.m_baby_monsters, function (baby) {
                 var breath_contraction = baby.m_breathing_loop / 8;
                 if (breath_contraction > 3)
                 {
@@ -1543,7 +1552,7 @@
         //----------------------------------------------------------------------
         handleBabyMonstersTimeStep: function ()
         {
-            Util.forEach(this.m_baby_monsters, function(baby) {
+            Util.forEach(this.m_baby_monsters, function (baby) {
                 baby.m_breathing_loop = (baby.m_breathing_loop + 1) % 48;
             });
         },
@@ -1557,23 +1566,23 @@
                 this.m_next_city_percent = 0;
 
                 var spawn_sites_map = {};
-                var maybePlaceCity = function(city, x, y) {
+                var maybePlaceCity = function (city, x, y) {
                     if (GameScreen.canPlaceCityAtGrid(x, y))
                     {
                         spawn_sites_map[x + "," + y] = [city, x, y];
                     }
                 };
-                var maybePlaceAroundCity = function(city, x, y) {
+                var maybePlaceAroundCity = function (city, x, y) {
                     maybePlaceCity(city, x + 1, y);
                     maybePlaceCity(city, x - 1, y);
                     maybePlaceCity(city, x, y + 1);
                     maybePlaceCity(city, x, y - 1);
                 };
-                Util.forEach(this.m_cities, function(city){
+                Util.forEach(this.m_cities, function (city) {
                     maybePlaceAroundCity(city, city.m_grid_x, city.m_grid_y)
                 });
                 var spawn_sites_arr = [];
-                Util.forEach(spawn_sites_map, function (site){
+                Util.forEach(spawn_sites_map, function (site) {
                     spawn_sites_arr.push(site);
                 });
                 if (0 != spawn_sites_arr.length)
@@ -1606,12 +1615,14 @@
                 return false;
             }
             var return_value = true;
-            Util.forEach(this.m_cities.concat(this.m_monsters), function(game_object){
-                if (game_object.m_grid_x == x && game_object.m_grid_y == y)
-                {
-                    return_value = false;
-                }
-            });
+            Util.forEach(this.m_cities.concat(this.m_monsters),
+                function (game_object) {
+                    if (game_object.m_grid_x == x
+                        && game_object.m_grid_y == y)
+                    {
+                        return_value = false;
+                    }
+                });
 
             if (null == this.getLandAtGrid(x, y).m_type.m_city_background_image)
             {
@@ -1756,12 +1767,12 @@
                 "Assets/Misc/TitleScreen.png", ResourceTracker);
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         reset: function ()
         {},
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         handleMouseClick: function ()
         {
@@ -1777,11 +1788,10 @@
             }
         },
 
-        //-------------------------------------------------------------------
+        //----------------------------------------------------------------------
         // from Screen
         handleKeyPress: function ()
-        {
-        },
+        {},
 
         //----------------------------------------------------------------------
         // from Screen
@@ -1810,21 +1820,20 @@
             var effective_height = this.m_spash_height * effective_width
                 / this.m_spash_width;
 
-            var x_origin = (this.m_layout.m_canvas_width - effective_width) / 2 ;
-            var y_origin = (this.m_layout.m_canvas_height - effective_height) / 2 ;
             g_ctx.globalAlpha = this.m_alpha;
             g_ctx.drawImage(
                 this.m_splash_image,
                 0, 0,
-                //x_origin,
-                //y_origin,
                 effective_width,
                 effective_height);
 
             g_ctx.fillStyle = "rgb(192,192,192)";
-
-            x_origin = this.m_layout.m_canvas_width / 2 ;
+            g_ctx.textAlign="center";
+            g_ctx.textBaseline="middle";
             g_ctx.font = "20px Arial";
+
+            var x_origin = this.m_layout.m_canvas_width / 2 ;
+
             g_ctx.fillText(
                 "Developed in 48 hours by:"
                 + " Alex S., (?), Alex S.J., Erik,",
@@ -1857,7 +1866,8 @@
     // game engine
 
     //--------------------------------------------------------------------------
-    function init() {
+    function init()
+    {
         //Canvas stuff
         var canvas_obj = $("#canvas");
         g_canvas = canvas_obj[0];
@@ -1877,7 +1887,8 @@
         var cell_size_by_width
             = layout.m_canvas_width / GameConstants.m_grid_size;
         var cell_size_by_height
-            = (layout.m_command_tray_y_offset - GameConstants.m_top_space) / GameConstants.m_grid_size;
+            = (layout.m_command_tray_y_offset - GameConstants.m_top_space)
+                / GameConstants.m_grid_size;
         layout.m_cell_size = Math.min(cell_size_by_width, cell_size_by_height);
         layout.m_grid_size = layout.m_cell_size * GameConstants.m_grid_size;
         layout.m_grid_x_offset
@@ -1917,7 +1928,8 @@
     }
 
     //--------------------------------------------------------------------------
-    function eventLoop() {
+    function eventLoop()
+    {
         var start_time = Date.now();
 
         if (mouse_click_pending) {
@@ -1938,7 +1950,8 @@
         if (comp_time > 40 || comp_time < 0) {
             setTimeout(eventLoop, 0);
         }
-        else {
+        else
+        {
             setTimeout(eventLoop, 40 - comp_time);
         }
     }
