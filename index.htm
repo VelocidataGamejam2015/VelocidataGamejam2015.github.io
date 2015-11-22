@@ -1208,6 +1208,19 @@
         {
             this.m_score = new Score(this.m_layout);
 
+            // default volume is 80
+            AudioComponents.m_new_city_1.setVolume(25);
+            AudioComponents.m_new_city_2.setVolume(25);
+            AudioComponents.m_make_baby.setVolume(100);
+            AudioComponents.m_bg.setVolume(45);
+            MonsterTypes.GLUTTONY.m_command_sound.setVolume(100);
+            MonsterTypes.LUST.m_command_sound.setVolume(100);
+            MonsterTypes.GREED.m_command_sound.setVolume(100);
+            MonsterTypes.PRIDE.m_command_sound.setVolume(100);
+            MonsterTypes.WRATH.m_command_sound.setVolume(70);
+            MonsterTypes.ENVY.m_command_sound.setVolume(100);
+            MonsterTypes.SLOTH.m_command_sound.setVolume(100);
+
             this.m_lands = [];
             this.m_mountains = [];
             this.m_cities = [];
@@ -1836,17 +1849,15 @@
 
             g_ctx.fillText(
                 "Developed in 48 hours by:"
-                + " Alex S., (?), Alex S.J., Erik,",
-                // Alex's wife
+                + " Alex S., Alex S.J., Erik,",
                 x_origin, 700
             );
             g_ctx.fillText(
-                "Joe, Louis, Michael, Saptarshi, and Terry",
+                "Joe, Louis, Michael, Nancy, Saptarshi, and Terry",
                 x_origin, 730
             );
             g_ctx.fillText(
-                "Artistic Inspiration by: Emily, Ethan, Katie, (?), and (?)",
-                // Terry's son, Erik's son
+                "Artistic Inspiration by: Andrew, Emily, Ethan, Katie, and Leon",
                 x_origin, 760
             );
             g_ctx.fillText(
