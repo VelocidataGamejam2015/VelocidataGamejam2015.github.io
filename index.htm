@@ -172,7 +172,51 @@
     };
 
     //##########################################################################
-
+    
+    //--------------------------------------------------------------------------
+    const PauseScreen = {
+        m_layout: null,
+        
+        //----------------------------------------------------------------------
+        init: function (layout) {
+          this.m_layout = layout;
+        },
+        //----------------------------------------------------------------------
+        reset: function () {},
+        //----------------------------------------------------------------------
+        handleMouseClick: function () {
+          g_current_screen = GameScreen;
+        },
+        //----------------------------------------------------------------------
+        handleKeyPress: function () {
+          g_current_screen = GameScreen;
+        },
+        //----------------------------------------------------------------------
+        handleTimeStep: function () {},
+        //----------------------------------------------------------------------
+        paint: function () {
+          GameScreen.paint();
+          g_ctx.globalAlpha = .7;
+          g_ctx.fillStyle = "rgb(0, 0, 0)";
+          g_ctx.fillRect(
+            0, 0,
+            this.m_layout.m_canvas_width,
+            this.m_layout.m_canvas_height);
+            
+            g_ctx.font="Bold 80px Arial";
+            g_ctx.fillStyle = "rgb(128, 128, 128)";
+            g_ctx.textAlign = "center";
+            g_ctx.textBaseline = "middle";
+            g_ctx.fillText(
+                "PAUSED",
+                this.m_layout.m_canvas_width / 2,
+                this.m_layout.m_canvas_height / 2
+            );
+        }
+    };
+    
+    //##########################################################################
+    
     //--------------------------------------------------------------------------
     var ResourceTracker = {
         m_added: 1, // I track myself loading
@@ -1505,6 +1549,10 @@
                     this.m_active_monster.giveCommand(command);
                 }
             }
+            else if (80 == key_code)
+            {
+              g_current_screen = PauseScreen;
+            }
             //alert(key_code);
         },
 
@@ -2026,6 +2074,7 @@
         // can't do this until you've set up canvas_width and canvas_height
         GameScreen.init(layout);
         SplashScreen.init(layout);
+        PauseScreen.init(layout);
         //ResourceTracker init must be called after all requests to 
         //loadImage/loadAudio
         ResourceTracker.init(layout);
