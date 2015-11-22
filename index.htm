@@ -460,6 +460,7 @@
 
             if (this.m_asleep)
             {
+                // adjust the position of the Z
                 this.m_z_age = this.m_z_age + 1;
                 if (this.m_z_age == 0)
                 {
@@ -489,8 +490,10 @@
             }
             else
             {
+                // move forward
                 this.m_move_percent += 1;
 
+                // deal with z-ordering
                 this.m_z_order_y_boost = 0;
                 if (this.m_is_valid_step)
                 {
@@ -506,6 +509,7 @@
                     }
                 }
 
+                // see if we reached the next cell
                 if (this.m_move_percent >= 100)
                 {
                     this.m_move_percent = 0;
@@ -517,23 +521,8 @@
                         this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
                         this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
 
-                        var monster = this;
-                        var city_index;
-                        for (city_index = 0;
-                            city_index < GameScreen.m_cities.length;
-                            city_index++)
-                        {
-                            var city = GameScreen.m_cities[city_index];
-                            if (monster.m_grid_x == city.m_grid_x
-                                && monster.m_grid_y == city.m_grid_y)
-                            {
-                                // monster eats the city - Remove the city from the screen
-                                GameScreen.m_cities.splice(city_index, 1);
-                                GameScreen.m_score.m_total_score += 1;
-                                AudioComponents.m_crush_city.play();
-                                break;
-                            }
-                        }
+                        GameScreen.handleMonsterEnteringCell(
+                            this, this.m_grid_x, this.m_grid_y)
                     }
 
                     // remove step
@@ -1413,8 +1402,28 @@
                 }
             }
             return false;
-        }
+        },
 
+        //----------------------------------------------------------------------
+        handleMonsterEnteringCell: function (monster, grid_x, grid_y)
+        {
+            var city_index;
+            for (city_index = 0;
+                city_index < this.m_cities.length;
+                city_index++)
+            {
+                var city = this.m_cities[city_index];
+                if (grid_x == city.m_grid_x
+                    && grid_y == city.m_grid_y)
+                {
+                    // monster eats the city - Remove the city from the screen
+                    this.m_cities.splice(city_index, 1);
+                    this.m_score.m_total_score += 1;
+                    AudioComponents.m_crush_city.play();
+                    break;
+                }
+            }
+        }
     };
 
     //##########################################################################
