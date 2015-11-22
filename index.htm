@@ -31,7 +31,7 @@
     //--------------------------------------------------------------------------
     const GameConstants = {
         m_grid_size: 10,
-        m_initial_monsters: 5,
+        m_initial_monsters: 2,
         m_initial_cities: 5,
         m_initial_commands: 3,
         m_command_size: 3,
@@ -105,6 +105,23 @@
         randomItem: function (arr)
         {
             return arr[Math.floor(Math.random() * arr.length)];
+        },
+
+        //----------------------------------------------------------------------
+        shuffle: function (arr) {
+            var current_index = arr.length, temp, random_index;
+            while (0 != current_index)
+            {
+                // Pick a remaining element.
+                random_index = Math.floor(Math.random() * current_index);
+                current_index -= 1;
+
+                // And swap it with the current element.
+                temp = arr[current_index];
+                arr[current_index] = arr[random_index];
+                arr[random_index] = temp;
+            }
+            return arr;
         },
 
         //----------------------------------------------------------------------
@@ -234,6 +251,8 @@
         m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav",
             ResourceTracker),
         m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav",
+            ResourceTracker),
+        m_make_baby: Util.loadAudio("Assets/Sound/baby_whine.wav",
             ResourceTracker)
     };
 
@@ -1098,6 +1117,8 @@
         m_lands: null,
         m_mountains: null,
         m_monsters: null,
+        m_baby_monsters: null,
+        m_remaining_monster_types: null,
         m_cities: null,
         m_monster_info_box: null,
         m_command_tray: null,
@@ -1168,33 +1189,29 @@
             }
 
             // initialize monsters
+            this.initializeRemainingMonsterTypes();
+            this.m_baby_monsters = [];
             this.m_monsters = [];
             var monster_index;
             for (monster_index = 0;
                 monster_index < GameConstants.m_initial_monsters;
                 ++monster_index)
             {
-                var tries = 0;
                 while (true)
                 {
-                    grid_x = Math.floor(Math.random() * GameConstants.m_grid_size);
-                    grid_y = Math.floor(Math.random() * GameConstants.m_grid_size);
-                    if (!this.containsCity(grid_x, grid_y) && !this.containsMonster(grid_x, grid_y))
-                    {
-                        break;
-                    }
-                    tries += 1;
-                    if (tries == GameConstants.m_max_initial_placement_tries)
+                    grid_x = Math.floor(Math.random()
+                        * GameConstants.m_grid_size);
+                    grid_y = Math.floor(Math.random()
+                        * GameConstants.m_grid_size);
+                    if (!this.containsCity(grid_x, grid_y)
+                        && !this.containsMonster(grid_x, grid_y))
                     {
                         break;
                     }
                 }
-                if (tries < GameConstants.m_max_initial_placement_tries)
-                {
-                    this.m_monsters.push(
-                        new Monster(Util.randomItem(ALL_MONSTER_TYPES),
-                            grid_x, grid_y, layout));
-                }
+                this.m_monsters.push(
+                    new Monster(this.m_remaining_monster_types.pop(),
+                        grid_x, grid_y, layout));
             }
 
             this.m_monster_info_box = new MonsterInfoBox(layout);
@@ -1208,6 +1225,32 @@
             {
                 this.m_command_tray.addCommand();
             }
+        },
+
+        //-------------------------------------------------------------------
+        initializeRemainingMonsterTypes: function() {
+            // start with one of each type
+            var monster_types = [].concat(ALL_MONSTER_TYPES);
+            var num_types = monster_types.length;
+            var last_type = num_types - 1;
+
+            // put them in random order
+            Util.shuffle(monster_types);
+
+            // move lust to head of queue (last element)
+            var index;
+            for (index = 0; index < num_types; ++index)
+            {
+                if (monster_types[index] == MonsterTypes.LUST)
+                {
+                    var temp = monster_types[last_type];
+                    monster_types[last_type] = monster_types[index];
+                    monster_types[index] = temp;
+                    break;
+                }
+            }
+
+            this.m_remaining_monster_types = monster_types;
         },
 
         //-------------------------------------------------------------------
@@ -1382,7 +1425,7 @@
             );
         },
 
-    //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
         handleSpawnCityTimeStep: function ()
         {
             this.m_next_city_percent += 1;
@@ -1461,7 +1504,7 @@
         containsMonster: function (grid_x, grid_y)
         {
             var index;
-            for (index=0; index < this.m_monsters.length; ++index)
+            for (index = 0; index < this.m_monsters.length; ++index)
             {
                 if (this.m_monsters[index].m_grid_x == grid_x
                     && this.m_monsters[index].m_grid_y == grid_y)
@@ -1473,8 +1516,24 @@
         },
 
         //----------------------------------------------------------------------
+        containsBabyMonster: function (grid_x, grid_y)
+        {
+            var index;
+            for (index = 0; index < this.m_baby_monsters.length; ++index)
+            {
+                if (this.m_baby_monsters[index].m_grid_x == grid_x
+                    && this.m_baby_monsters[index].m_grid_y == grid_y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        //----------------------------------------------------------------------
         handleMonsterEnteringCell: function (monster, grid_x, grid_y)
         {
+            // destroy cities
             var city_index;
             for (city_index = 0;
                 city_index < this.m_cities.length;
@@ -1489,6 +1548,50 @@
                     this.m_score.m_total_score += 1;
                     AudioComponents.m_crush_city.play();
                     break;
+                }
+            }
+
+            // see if we can make a baby monster
+            if (0 != this.m_remaining_monster_types.length)
+            {
+                var found_other = false;
+                var found_lust = false;
+                Util.forEach(this.m_monsters, function (monster)
+                {
+                    if (monster.m_grid_x == grid_x
+                        && monster.m_grid_y == grid_y)
+                    {
+                        if (monster.m_type == MonsterTypes.LUST)
+                        {
+                            found_lust = true;
+                        }
+                        else
+                        {
+                            found_other = true;
+                        }
+                    }
+                });
+                if (found_other && found_lust
+                    && !this.containsBabyMonster(grid_x, grid_y))
+                {
+                    // make a baby monster
+                    this.m_baby_monsters.push(
+                        new Monster(this.m_remaining_monster_types.pop(),
+                            grid_x, grid_y, this.m_layout));
+                    AudioComponents.m_make_baby.play();
+                }
+            }
+
+            // see if any babies can become real (because we left a cell)
+            var index;
+            for (index = 0; index < this.m_baby_monsters.length; ++index)
+            {
+                if (!this.containsMonster(
+                    this.m_baby_monsters[index].m_grid_x,
+                    this.m_baby_monsters[index].m_grid_y))
+                {
+                    this.m_monsters.push(this.m_baby_monsters[index]);
+                    this.m_baby_monsters.splice(index, 1);
                 }
             }
         }
