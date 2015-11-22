@@ -61,6 +61,7 @@
         m_city_z_order: 1,
         m_monster_z_order: 2
     };
+    const PAINT_OVERLAY_IF_AVAILABLE = true;
 
     //--------------------------------------------------------------------------
     // interface, for reference, not enforced
@@ -262,8 +263,10 @@
         },
         MOUNTAINS: {
             m_fill_style: "rgb(128, 128, 128)",
-            m_image: Util.loadImage("Assets/Landscape/S_MountainsTiled.png",
-                ResourceTracker)
+            m_image: Util.loadImage("Assets/Landscape/S_MountainsTiledBg.png",
+                ResourceTracker),
+            m_overlay_image: Util.loadImage(
+                "Assets/Landscape/S_MountainsTiledL1L2.png", ResourceTracker)
         },
         WATER: {
             m_fill_style: "rgb(128, 128, 255)",
@@ -297,15 +300,21 @@
 
         //----------------------------------------------------------------------
         // from GameObject
-        this.paint = function ()
+        this.paint = function (show_overlay)
         {
+            var image = this.m_type.m_image;
+            if (show_overlay)
+            {
+                image = this.m_type.m_overlay_image
+            }
+
             var x_origin = this.m_layout.m_grid_x_offset
                 + this.m_grid_x * this.m_layout.m_cell_size;
             var y_origin = this.m_layout.m_grid_y_offset
                 + this.m_grid_y * this.m_layout.m_cell_size;
             var scale = this.m_layout.m_scale;
             g_ctx.drawImage(
-                this.m_type.m_image,
+                image,
                 x_origin - GameConstants.m_land_origin_x_offset * scale,
                 y_origin - GameConstants.m_land_origin_y_offset * scale,
                 GameConstants.m_land_width * scale,
@@ -516,12 +525,12 @@
                 if (this.m_is_valid_step)
                 {
                     if (this.m_commands[0].m_steps[0].m_dy > 0
-                        && this.m_move_percent >= 50)
+                        && this.m_move_percent >= 75)
                     {
                         this.m_z_order_y_boost = 1;
                     }
                     else if (this.m_commands[0].m_steps[0].m_dy < 0
-                        && this.m_move_percent >= 50)
+                        && this.m_move_percent >= 25)
                     {
                         this.m_z_order_y_boost = -1;
                     }
@@ -573,7 +582,8 @@
                 this.m_x_shift = this.m_commands[0].m_steps[0].m_dx * shift;
                 this.m_y_shift = this.m_commands[0].m_steps[0].m_dy * shift;
             }
-            else {
+            else
+            {
                 this.m_x_shift = 0;
                 this.m_y_shift = 0;
             }
@@ -869,7 +879,7 @@
         };
 
         //----------------------------------------------------------------------
-        this.rotate_left = function()
+        this.rotateLeft = function()
         {
             var new_steps = [];
             Util.forEach(this.m_steps, function(step) {
@@ -879,7 +889,7 @@
         };
 
         //----------------------------------------------------------------------
-        this.rotate_right = function()
+        this.rotateRight = function()
         {
             var new_steps = [];
             Util.forEach(this.m_steps, function(step) {
@@ -920,7 +930,7 @@
         this.m_countdown_to_next_command_progress = 0.0;
 
         //----------------------------------------------------------------------
-        this.add_command = function ()
+        this.addCommand = function ()
         {
             var monster_command = new MonsterCommand();
             for (step_index = 0;
@@ -940,18 +950,18 @@
         };
 
         //----------------------------------------------------------------------
-        this.rotate_left = function()
+        this.rotateLeft = function()
         {
             Util.forEach(this.m_commands, function(command) {
-                command.rotate_left();
+                command.rotateLeft();
             });
         };
 
         //----------------------------------------------------------------------
-        this.rotate_right = function()
+        this.rotateRight = function()
         {
             Util.forEach(this.m_commands, function(command) {
-                command.rotate_right();
+                command.rotateRight();
             });
         };
 
@@ -984,7 +994,7 @@
                 else
                 {
                     this.m_countdown_to_next_command_progress = 0.0;
-                    this.add_command();
+                    this.addCommand();
                 }
             }
         };
@@ -1071,6 +1081,7 @@
 
         m_score: null,
         m_lands: null,
+        m_mountains: null,
         m_monsters: null,
         m_cities: null,
         m_monster_info_box: null,
@@ -1095,14 +1106,19 @@
             // initialize land
             var grid_x, grid_y;
             this.m_lands = [];
+            this.m_mountains = [];
             var layout = this.m_layout;
             for (grid_x = 0; grid_x < GameConstants.m_grid_size; ++grid_x)
             {
                 for (grid_y = 0; grid_y < GameConstants.m_grid_size; ++grid_y)
                 {
-                    this.m_lands.push(
-                        new Land(Util.randomItem(ALL_LAND_TYPES),
-                            grid_x, grid_y, layout));
+                    var land = new Land(Util.randomItem(ALL_LAND_TYPES),
+                        grid_x, grid_y, layout);
+                    this.m_lands.push(land);
+                    if (land.m_type == LandTypes.MOUNTAINS)
+                    {
+                        this.m_mountains.push(land);
+                    }
                 }
             }
 
@@ -1175,7 +1191,7 @@
                 command_index < GameConstants.m_initial_commands;
                 ++command_index)
             {
-                this.m_command_tray.add_command();
+                this.m_command_tray.addCommand();
             }
         },
 
@@ -1227,11 +1243,11 @@
             }
             else if (65 == key_code) // a
             {
-                this.m_command_tray.rotate_left();
+                this.m_command_tray.rotateLeft();
             }
             else if (68 == key_code) // d
             {
-                this.m_command_tray.rotate_right();
+                this.m_command_tray.rotateRight();
             }
             else if (83 == key_code) // s
             {
@@ -1288,7 +1304,8 @@
             });
 
             var paintables = [];
-            paintables = paintables.concat(this.m_cities, this.m_monsters);
+            paintables = paintables.concat(
+                this.m_mountains, this.m_cities, this.m_monsters);
             paintables.sort(function(left, right) {
 
                 var left_y = left.m_grid_y + left.m_z_order_y_boost;
@@ -1322,7 +1339,7 @@
             });
 
             Util.forEach(paintables, function(paintable){
-                paintable.paint();
+                paintable.paint(PAINT_OVERLAY_IF_AVAILABLE);
             });
 
             this.m_monster_info_box.paint();
