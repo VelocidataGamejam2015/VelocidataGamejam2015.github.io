@@ -402,56 +402,79 @@
             m_image: Util.loadImage("Assets/Monsters/S_GluttonousTomato.png",
                 ResourceTracker),
             m_name: "GluttonousTomato.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/yum_yam_yum.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/yum_yam_yum.wav", ResourceTracker)
+            ]
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_LustyCarrot.png",
                 ResourceTracker),
             m_name: "LustyCarrot.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/lust1.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                //Util.loadAudio("Assets/Sound/lust1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/LustyCarrot/ForYouAnything.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/LustyCarrot/Hey.wav", ResourceTracker)
+            ]
         },
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_GreedyCelery.png",
                 ResourceTracker),
             m_name: "GreedyCelery.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/gimme_gimme.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/gimme_gimme.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/GreedyCelery/ThatsNice.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/GreedyCelery/TakeThatOffYourHands.wav", ResourceTracker)
+            ]
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_PridefulEggplant.png",
                 ResourceTracker),
             m_name: "PridefulEggplant.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/rawr_short.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/PridefulEggplant/DemandTheBest.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/PridefulEggplant/PrideGoeth.wav", ResourceTracker)
+            ]
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_WrathfulPepper.png",
                 ResourceTracker),
             m_name: "WrathfulPepper.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/wrath1.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/wrath1.wav",
+                ResourceTracker)]
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_EnviousBroccoli.png",
                 ResourceTracker),
             m_name: "EnviousBroccoli.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/rawr1.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/EnviousBroccoli/SendMeThere.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/EnviousBroccoli/WishMyCity.wav", ResourceTracker)
+            ]
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
             m_image: Util.loadImage("Assets/Monsters/S_SlothfulPotato.png",
                 ResourceTracker),
             m_name: "SlothfulPotato.txt",
-            m_command_sound: Util.loadAudio("Assets/Sound/sloth1.wav",
-                ResourceTracker)
+            m_command_sound: [
+                //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
+                //Util.loadAudio("Assets/Sound/sloth1.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/SlothfulPotato/mumblemumble.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/SlothfulPotato/Yawn.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/SlothfulPotato/YeahOk.wav", ResourceTracker)
+            ]
         }
     };
     const ALL_MONSTER_TYPES = [];
@@ -489,10 +512,7 @@
         //----------------------------------------------------------------------
         this.giveCommand = function (command)
         {
-            if (null != this.m_type.m_command_sound)
-            {
-                this.m_type.m_command_sound.play();
-            }
+            Util.randomItem(this.m_type.m_command_sound).play();
             this.m_commands.push(command);
             if (this.m_asleep)
             {
@@ -1010,6 +1030,7 @@
         this.m_shake = 0;
         this.m_layout = layout;
         this.m_countdown_to_next_command_progress = 0.0;
+        this.m_circle_percent = 0;
 
         //----------------------------------------------------------------------
         this.addCommand = function ()
@@ -1082,8 +1103,15 @@
             {
                 this.m_shake -= Math.PI * 2 / 3;
             }
+
             this.m_countdown_to_next_command_progress
                 += GameConstants.m_command_refresh_speed;
+
+            this.m_circle_percent += 5;
+            if (this.m_circle_percent > 100)
+            {
+                this.m_circle_percent -= 100;
+            }
 
             if (this.m_countdown_to_next_command_progress >= 100)
             {
@@ -1115,6 +1143,8 @@
                 shake_offset = Math.sin(this.m_shake) * 5;
                 x_offset += shake_offset;
             }
+            var circle_x_offset = x_offset;
+            var circle_y_offset = y_offset;
 
             g_ctx.fillStyle = "rgb(0, 0, 0)";
             g_ctx.fillRect(
@@ -1140,6 +1170,27 @@
                command.paint(x_offset, y_offset);
                 x_offset += layout.m_cell_size
             });
+
+
+            if (false && 0 != this.m_commands.length)
+            {
+                var angle = 0;
+                for (; angle < 100; angle += 10)
+                {
+                    var arc_start = angle / 100 * 2 * Math.PI;
+                    var arc_end = (angle + 10) / 100 * 2 * Math.PI;
+                    var color = 255 * (((angle + this.m_circle_percent) % 100) / 100);
+                    g_ctx.strokeStyle = "rgb(0, 0, " + color + ")";
+                    g_ctx.beginPath();
+                    g_ctx.moveTo(
+                        circle_x_offset + Math.cos(arc_start) * 20,
+                        circle_y_offset + Math.sin(arc_start) * 10);
+                    g_ctx.lineTo(
+                        circle_x_offset + Math.cos(arc_end) * 20,
+                        circle_y_offset + Math.sin(arc_end) * 10);
+                    g_ctx.stroke();
+                }
+            }
         }
     };
 
@@ -1213,13 +1264,13 @@
             AudioComponents.m_new_city_2.setVolume(25);
             AudioComponents.m_make_baby.setVolume(100);
             AudioComponents.m_bg.setVolume(45);
-            MonsterTypes.GLUTTONY.m_command_sound.setVolume(100);
-            MonsterTypes.LUST.m_command_sound.setVolume(100);
-            MonsterTypes.GREED.m_command_sound.setVolume(100);
-            MonsterTypes.PRIDE.m_command_sound.setVolume(100);
-            MonsterTypes.WRATH.m_command_sound.setVolume(70);
-            MonsterTypes.ENVY.m_command_sound.setVolume(100);
-            MonsterTypes.SLOTH.m_command_sound.setVolume(100);
+//            MonsterTypes.GLUTTONY.m_command_sound.setVolume(100);
+//            MonsterTypes.LUST.m_command_sound.setVolume(100);
+//            MonsterTypes.GREED.m_command_sound.setVolume(100);
+//            MonsterTypes.PRIDE.m_command_sound.setVolume(100);
+//            MonsterTypes.WRATH.m_command_sound.setVolume(70);
+//            MonsterTypes.ENVY.m_command_sound.setVolume(100);
+//            MonsterTypes.SLOTH.m_command_sound.setVolume(100);
 
             this.m_lands = [];
             this.m_mountains = [];
@@ -1281,6 +1332,7 @@
             var monster_index;
             for (monster_index = 0;
                 monster_index < GameConstants.m_initial_monsters;
+                //monster_index < 7;
                 ++monster_index)
             {
                 while (true)
