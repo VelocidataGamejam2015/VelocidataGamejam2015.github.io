@@ -933,12 +933,27 @@
         this.addCommand = function ()
         {
             var monster_command = new MonsterCommand();
+            var vertical_move = MonsterSteps.MOVE_UP;
+            if(Math.random()>.5)
+            {
+              vertical_move = MonsterSteps.MOVE_DOWN;
+            }
+            var horizontal_move = MonsterSteps.MOVE_LEFT;
+            if(Math.random()>.5)
+            {
+              horizontal_move = MonsterSteps.MOVE_RIGHT;
+            }
             for (step_index = 0;
                  step_index < GameConstants.m_command_size;
                  ++step_index)
             {
+                var random_move = vertical_move;
+                if(Math.random()>.5)
+                {
+                  random_move = horizontal_move
+                }
                 monster_command.push(
-                        Util.randomItem(ALL_MONSTER_STEP_TYPES), layout);
+                        random_move, layout);
             }
             this.m_commands.push(monster_command);
         };
