@@ -20,7 +20,21 @@
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
-     id="defs4168" />
+     id="defs4168">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter10831"
+       x="-0.048487113"
+       width="1.0969742"
+       y="-0.07868256"
+       height="1.1573651">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.4860319"
+         id="feGaussianBlur10833" />
+    </filter>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -57,7 +71,7 @@
      id="layer8"
      inkscape:label="BoundingBox"
      sodipodi:insensitive="true"
-     style="display:inline">
+     style="display:none">
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect15863"
@@ -73,7 +87,7 @@
      inkscape:label="Shadow"
      style="opacity:0.5">
     <path
-       style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter10831)"
        d="m 135.35714,159.28572 c -2.30458,-1.56695 -4.45581,-5.57445 -2.85714,-7.85715 18.89903,-26.98548 42.40498,-26.72051 74.64286,-60.71428 7.37998,-7.78194 22.70614,-3.66761 32.14285,1.42857 7.87849,4.25468 15.69353,12.8318 15.71429,21.78571 0.019,8.19267 -6.42711,17.68429 -14.28571,20 -32.17399,9.48078 -54.36884,12.25079 -79.64286,24.64286 -7.69909,3.77493 -18.62338,5.5356 -25.71429,0.71429 z"
        id="path7440"
        inkscape:connector-curvature="0"
