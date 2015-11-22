@@ -2024,9 +2024,11 @@
         }, false);
 
         // can't do this until you've set up canvas_width and canvas_height
-        ResourceTracker.init(layout);
         GameScreen.init(layout);
         SplashScreen.init(layout);
+        //ResourceTracker init must be called after all requests to 
+        //loadImage/loadAudio
+        ResourceTracker.init(layout);
 
         switchToScreen(ResourceTracker);
 
