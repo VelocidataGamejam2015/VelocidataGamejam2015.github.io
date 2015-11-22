@@ -52,6 +52,11 @@
         m_monster_width: 300,
         m_monster_height: 300,
 
+        m_baby_origin_x_offset: -25,
+        m_baby_origin_y_offset: -25,
+        m_baby_width: 50,
+        m_baby_height: 50,
+
         m_city_origin_x_offset: 100,
         m_city_origin_y_offset: 100,
         m_city_width: 200,
@@ -253,6 +258,8 @@
         m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav",
             ResourceTracker),
         m_make_baby: Util.loadAudio("Assets/Sound/baby_whine.wav",
+            ResourceTracker),
+        m_baby_becomes_monster: Util.loadAudio("Assets/Sound/dum_dum_dummm.wav",
             ResourceTracker)
     };
 
@@ -884,6 +891,9 @@
     };
     const ALL_MONSTER_STEP_TYPES = [];
     Util.forEach(MonsterSteps, function(item) { ALL_MONSTER_STEP_TYPES.push(item); } );
+    const MonsterUtil = {
+        m_baby_image: Util.loadImage("Assets/Misc/S_Heart.png", ResourceTracker)
+    };
 
     //--------------------------------------------------------------------------
     var MonsterCommand = function(layout)
@@ -1338,6 +1348,8 @@
             this.m_command_tray.handleTimeStep();
 
             this.handleSpawnCityTimeStep()
+
+            this.handleBabyMonstersTimeStep()
         },
 
         //----------------------------------------------------------------------
@@ -1396,6 +1408,8 @@
                 paintable.paint(PAINT_OVERLAY_IF_AVAILABLE);
             });
 
+            this.paintBabyMonsters();
+
             this.m_monster_info_box.paint();
 
             this.m_command_tray.paint();
@@ -1423,6 +1437,49 @@
                 "Press '1' to start music, '2' to end it.",
                 600, 10
             );
+        },
+
+        //----------------------------------------------------------------------
+        paintBabyMonsters: function ()
+        {
+            Util.forEach(this.m_baby_monsters, function(baby) {
+                var breath_contraction = baby.m_breathing_loop / 8;
+                if (breath_contraction > 3)
+                {
+                    breath_contraction = 6 - breath_contraction
+                }
+                var height_offset = baby.m_breathing_loop;
+                if (height_offset > 24) {
+                    height_offset = 48 - height_offset;
+                }
+                var x_origin = baby.m_layout.m_grid_x_offset
+                    + baby.m_grid_x * baby.m_layout.m_cell_size;
+                var y_origin = baby.m_layout.m_grid_y_offset
+                    + baby.m_grid_y * baby.m_layout.m_cell_size;
+                var scale = baby.m_layout.m_scale;
+                g_ctx.drawImage(
+                    MonsterUtil.m_baby_image,
+                    x_origin
+                        - GameConstants.m_baby_origin_x_offset * scale
+                        + Math.sin(height_offset / 2) * 3
+                        + breath_contraction,
+                    y_origin
+                        - GameConstants.m_baby_origin_y_offset * scale
+                        - height_offset
+                        + 2 * breath_contraction,
+                    GameConstants.m_baby_width * scale
+                        - breath_contraction * 2,
+                    GameConstants.m_baby_height * scale
+                        - breath_contraction * 2);
+            });
+        },
+
+        //----------------------------------------------------------------------
+        handleBabyMonstersTimeStep: function ()
+        {
+            Util.forEach(this.m_baby_monsters, function(baby) {
+                baby.m_breathing_loop = (baby.m_breathing_loop + 1) % 48;
+            });
         },
 
         //----------------------------------------------------------------------
@@ -1592,6 +1649,7 @@
                 {
                     this.m_monsters.push(this.m_baby_monsters[index]);
                     this.m_baby_monsters.splice(index, 1);
+                    AudioComponents.m_baby_becomes_monster.play();
                 }
             }
         }
