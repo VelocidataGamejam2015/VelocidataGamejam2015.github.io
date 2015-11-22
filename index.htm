@@ -1242,19 +1242,13 @@
         {
             if (49 == key_code) // 1
             {
-              //play the sound and restart it
-              if (!AudioComponents.m_bg.isPaused())
-              {
-                AudioComponents.m_bg.stop();
-                AudioComponents.m_bg.setTime(0);
-                AudioComponents.m_bg.play();
-              }
-              AudioComponents.m_bg.play();
+                // start background music loop
+                AudioComponents.m_bg.loop().play();
             }
             else if (50 == key_code) // 2
             {
-              //start background music loop
-              AudioComponents.m_bg.loop().play();
+              // start background music loop
+              AudioComponents.m_bg.stop();
             }
             else if (65 == key_code) // a
             {
@@ -1264,7 +1258,7 @@
             {
                 this.m_command_tray.rotateRight();
             }
-            else if (83 == key_code) // s
+            else if (32 == key_code) // spc   // s = 83
             {
                 if (null == this.m_active_monster
                     || 0 == this.m_command_tray.m_commands.length)
@@ -1313,6 +1307,8 @@
             g_ctx.fillRect(
                 0, 0,
                 this.m_layout.m_canvas_width, this.m_layout.m_canvas_height);
+
+            this.paintHelp();
 
             Util.forEach(this.m_lands, function(land){
                 land.paint();
@@ -1365,6 +1361,28 @@
         },
 
         //----------------------------------------------------------------------
+        // from GameObject
+        paintHelp: function ()
+        {
+            g_ctx.fillStyle = "rgb(192,192,192)";
+
+            g_ctx.font = "15px Arial";
+            g_ctx.fillText(
+                "Press 'a' and 'd' to rotate the commands.",
+                200, 10
+            );
+            g_ctx.fillText(
+                "Press 'space' to give the next command"
+                + " to the selected monster.",
+                200, 25
+            );
+            g_ctx.fillText(
+                "Press '1' to start music, '2' to end it.",
+                600, 10
+            );
+        },
+
+    //----------------------------------------------------------------------
         handleSpawnCityTimeStep: function ()
         {
             this.m_next_city_percent += 1;
