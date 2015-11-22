@@ -404,7 +404,10 @@
             m_name: "GluttonousTomato.txt",
             m_command_sound: [
                 //Util.loadAudio("Assets/Sound/rawr1.wav", ResourceTracker),
-                Util.loadAudio("Assets/Sound/yum_yam_yum.wav", ResourceTracker)
+                //Util.loadAudio("Assets/Sound/yum_yam_yum.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/GluttinousTomato/mmmmmmm.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/GluttinousTomato/Omnomnom.wav", ResourceTracker),
+                Util.loadAudio("Assets/Sound/MonsterNoises/GluttinousTomato/Tasty.wav", ResourceTracker)
             ]
         },
         LUST: {
@@ -1172,22 +1175,24 @@
             });
 
 
-            if (false && 0 != this.m_commands.length)
+            if (0 != this.m_commands.length)
             {
+                circle_x_offset += 30;
                 var angle = 0;
-                for (; angle < 100; angle += 10)
+                for (; angle < 100; angle += 5)
                 {
                     var arc_start = angle / 100 * 2 * Math.PI;
                     var arc_end = (angle + 10) / 100 * 2 * Math.PI;
-                    var color = 255 * (((angle + this.m_circle_percent) % 100) / 100);
+                    var color_angle = (angle + this.m_circle_percent) % 100;
+                    var color = Math.floor(255 * ( (100 - color_angle) / 100));
                     g_ctx.strokeStyle = "rgb(0, 0, " + color + ")";
                     g_ctx.beginPath();
                     g_ctx.moveTo(
-                        circle_x_offset + Math.cos(arc_start) * 20,
-                        circle_y_offset + Math.sin(arc_start) * 10);
+                        circle_x_offset + Math.cos(-arc_start) * 40,
+                        circle_y_offset + Math.sin(-arc_start) * 15);
                     g_ctx.lineTo(
-                        circle_x_offset + Math.cos(arc_end) * 20,
-                        circle_y_offset + Math.sin(arc_end) * 10);
+                        circle_x_offset + Math.cos(-arc_end) * 40,
+                        circle_y_offset + Math.sin(-arc_end) * 15);
                     g_ctx.stroke();
                 }
             }
