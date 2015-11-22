@@ -16,7 +16,7 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="Celery.svg"
-   inkscape:export-filename="C:\Users\Shep\Documents\GitHub\VelocidataGamejam2015.github.io\S_GreedyCelery.png"
+   inkscape:export-filename="C:\Users\Shep\Documents\GitHub\VelocidataGamejam2015.github.io\Assets\Monsters\S_GreedyCelery.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -30,7 +30,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
      inkscape:cx="130.85062"
-     inkscape:cy="159.53239"
+     inkscape:cy="145.24668"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -57,7 +57,7 @@
      id="layer8"
      inkscape:label="BoundingBox"
      sodipodi:insensitive="true"
-     style="display:inline">
+     style="display:none">
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect15863"
