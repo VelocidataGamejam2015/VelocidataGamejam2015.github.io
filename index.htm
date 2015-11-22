@@ -47,6 +47,11 @@
         m_land_width: 200,
         m_land_height: 200,
 
+        m_monster_origin_x_offset: 100,
+        m_monster_origin_y_offset: 100,
+        m_monster_width: 300,
+        m_monster_height: 300,
+
         m_city_origin_x_offset: 100,
         m_city_origin_y_offset: 100,
         m_city_width: 200,
@@ -225,8 +230,10 @@
 
     //--------------------------------------------------------------------------
     var AudioComponents = {
-        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav", ResourceTracker),
-        m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav", ResourceTracker)
+        m_bg: Util.loadAudio("Assets/Sound/50sBmovie.wav",
+            ResourceTracker),
+        m_crush_city: Util.loadAudio("Assets/Sound/city_crush1.wav",
+            ResourceTracker)
     };
 
     //##########################################################################
@@ -312,37 +319,44 @@
     const MonsterTypes = {
         GLUTTONY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_GluttonousTomato.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_GluttonousTomato.png",
+                ResourceTracker),
             m_name: "GluttonousTomato.txt"
         },
         LUST: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_LustyCarrot.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_LustyCarrot.png",
+                ResourceTracker),
             m_name: "LustyCarrot.txt"
         },
         GREED: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_GreedyCelery.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_GreedyCelery.png",
+                ResourceTracker),
             m_name: "GreedyCelery.txt"
         },
         PRIDE: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_PridefulEggplant.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_PridefulEggplant.png",
+                ResourceTracker),
             m_name: "PridefulEggplant.txt"
         },
         WRATH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_WrathfulPepper.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_WrathfulPepper.png",
+                ResourceTracker),
             m_name: "WrathfulPepper.txt"
         },
         ENVY: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_EnviousBroccoli.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_EnviousBroccoli.png",
+                ResourceTracker),
             m_name: "EnviousBroccoli.txt"
         },
         SLOTH: {
             m_fill_style: "rgb(255, 127, 0)",
-            m_image: Util.loadImage("Assets/Monsters/S_SlothfulPotato.png", ResourceTracker),
+            m_image: Util.loadImage("Assets/Monsters/S_SlothfulPotato.png",
+                ResourceTracker),
             m_name: "SlothfulPotato.txt"
         }
     };
@@ -370,22 +384,6 @@
 
         this.m_image = this.m_type.m_image;
         this.m_name = this.m_type.m_name;
-        this.m_real_width = this.m_layout.m_cell_size;
-        this.m_real_height = this.m_layout.m_cell_size;
-        if (this.m_image.height > this.m_image.width)
-        {
-            this.m_real_width = this.m_layout.m_cell_size *
-                    this.m_image.width / this.m_image.height;
-        }
-        else
-        {
-            this.m_real_height = this.m_layout.m_cell_size *
-                    this.m_image.height / this.m_image.width;
-        }
-        this.m_real_height_offset
-                = this.m_layout.m_cell_size - this.m_real_height;
-        this.m_real_width_offset
-                = (this.m_layout.m_cell_size - this.m_real_width) / 2;
 
         this.m_breathing_loop = Math.floor(48 * Math.random());
         this.m_asleep = true;
@@ -519,12 +517,16 @@
                         this.m_grid_x += this.m_commands[0].m_steps[0].m_dx;
                         this.m_grid_y += this.m_commands[0].m_steps[0].m_dy;
 
-                        var monster=this;
+                        var monster = this;
                         var city_index;
-                        for(city_index=0; city_index < GameScreen.m_cities.length; city_index++)
+                        for (city_index = 0;
+                            city_index < GameScreen.m_cities.length;
+                            city_index++)
                         {
                             var city = GameScreen.m_cities[city_index];
-                            if (monster.m_grid_x == city.m_grid_x && monster.m_grid_y == city.m_grid_y) {
+                            if (monster.m_grid_x == city.m_grid_x
+                                && monster.m_grid_y == city.m_grid_y)
+                            {
                                 // monster eats the city - Remove the city from the screen
                                 GameScreen.m_cities.splice(city_index, 1);
                                 Game.m_total_score += 1;
@@ -574,26 +576,30 @@
         // from GameObject
         this.paint = function ()
         {
-            var diff = this.m_breathing_loop / 8;
-            if (diff > 3)
+            var breath_contraction = this.m_breathing_loop / 8;
+            if (breath_contraction > 3)
             {
-                diff = 6 - diff
+                breath_contraction = 6 - breath_contraction
             }
+            var x_origin = this.m_layout.m_grid_x_offset
+                + this.m_grid_x * this.m_layout.m_cell_size;
+            var y_origin = this.m_layout.m_grid_y_offset
+                + this.m_grid_y * this.m_layout.m_cell_size;
+            var scale = this.m_layout.m_scale;
             g_ctx.drawImage(
                 this.m_image,
-                this.m_layout.m_grid_x_offset
-                    + (this.m_grid_x - 1) * this.m_layout.m_cell_size
+                x_origin
+                    - GameConstants.m_monster_origin_x_offset * scale
                     + this.m_x_shift
-                    + diff
-                    + this.m_real_width_offset,
-                this.m_layout.m_grid_y_offset
-                    + (this.m_grid_y - 1) * this.m_layout.m_cell_size
+                    + breath_contraction,
+                y_origin
+                    - GameConstants.m_city_origin_y_offset * scale
                     + this.m_y_shift
-                    + 2 * diff
-                    + this.m_real_height_offset,
-                this.m_real_width * 3 - diff * 2,
-                this.m_real_height * 3 - diff * 2
-            );
+                    + 2 * breath_contraction,
+                GameConstants.m_monster_width * scale
+                    - breath_contraction * 2,
+                GameConstants.m_monster_height * scale
+                    - breath_contraction * 2);
             if (this.m_asleep && this.m_z_age >= 0)
             {
                 g_ctx.font = "45px Arial";
