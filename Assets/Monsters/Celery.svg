@@ -29,10 +29,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
-     inkscape:cx="130.85062"
-     inkscape:cy="145.24668"
+     inkscape:cx="48.529191"
+     inkscape:cy="173.81811"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer4"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
@@ -48,7 +48,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -57,7 +57,7 @@
      id="layer8"
      inkscape:label="BoundingBox"
      sodipodi:insensitive="true"
-     style="display:none">
+     style="display:inline">
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect15863"
@@ -68,13 +68,25 @@
        transform="translate(0,-752.36216)" />
   </g>
   <g
-     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Shadow"
+     style="opacity:0.5">
+    <path
+       style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 135.35714,159.28572 c -2.30458,-1.56695 -4.45581,-5.57445 -2.85714,-7.85715 18.89903,-26.98548 42.40498,-26.72051 74.64286,-60.71428 7.37998,-7.78194 22.70614,-3.66761 32.14285,1.42857 7.87849,4.25468 15.69353,12.8318 15.71429,21.78571 0.019,8.19267 -6.42711,17.68429 -14.28571,20 -32.17399,9.48078 -54.36884,12.25079 -79.64286,24.64286 -7.69909,3.77493 -18.62338,5.5356 -25.71429,0.71429 z"
+       id="path7440"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ssssssss" />
+  </g>
+  <g
+     inkscape:label="Creature"
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-752.36216)">
     <g
        id="g15867"
-       transform="translate(-2.7460637,0)">
+       transform="translate(-4.1746351,-15.357143)">
       <path
          inkscape:connector-curvature="0"
          id="path4868"
