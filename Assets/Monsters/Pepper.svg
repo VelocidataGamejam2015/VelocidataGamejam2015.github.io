@@ -101,10 +101,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
-     inkscape:cx="93.592868"
+     inkscape:cx="11.271439"
      inkscape:cy="185.67884"
      inkscape:document-units="px"
-     inkscape:current-layer="layer9"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
@@ -128,7 +128,7 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="BoundingBox"
-     style="display:inline"
+     style="display:none"
      sodipodi:insensitive="true">
     <rect
        transform="translate(0,-752.36216)"
