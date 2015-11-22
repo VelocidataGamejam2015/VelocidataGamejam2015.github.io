@@ -35,6 +35,7 @@
         m_max_num_commands: 9,
         m_max_initial_placement_tries: 100,
         m_top_space: 75,
+        m_total_game_time: 5*60*1000,
 
         m_land_origin_x_offset: 100,
         m_land_origin_y_offset: 100,
@@ -1221,11 +1222,50 @@
         // from GameObject
         this.paint = function ()
         {
-            g_ctx.font = "28px Arial";
+            g_ctx.font = "24px Arial";
             g_ctx.fillStyle = "rgb(192,192,192)";
             g_ctx.fillText(
                 "Score: " + this.m_total_score.toString(),
                 10, 18
+            );
+        }
+    };
+
+    //##########################################################################
+
+    //--------------------------------------------------------------------------
+    var Timer = function (layout)
+    {
+        this.m_start_time = Date.now();
+        this.m_end_time = this.m_start_time + GameConstants.m_total_game_time;
+        this.m_time_remaining = GameConstants.m_total_game_time;
+        this.m_layout = layout;
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.isClicked = function ()
+        {};
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.handleTimeStep = function ()
+        {
+            this.m_time_remaining = this.m_end_time - Date.now();
+            if (this.m_time_remaining < 0)
+            {
+                this.m_time_remaining = 0;
+            }
+        };
+
+        //----------------------------------------------------------------------
+        // from GameObject
+        this.paint = function ()
+        {
+            g_ctx.font = "20px Arial";
+            g_ctx.fillStyle = "rgb(192,192,192)";
+            g_ctx.fillText(
+                    "Time remaining: " + Math.floor(this.m_time_remaining / 1000).toString() + " s",
+                    10, 40
             );
         }
     };
@@ -1238,6 +1278,7 @@
         m_layout: null,
 
         m_score: null,
+        m_timer: null,
         m_lands: null,
         m_mountains: null,
         m_monsters: null,
@@ -1263,6 +1304,7 @@
         reset: function ()
         {
             this.m_score = new Score(this.m_layout);
+            this.m_timer = new Timer(this.m_layout);
 
             // default volume is 80
             AudioComponents.m_new_city_1.setVolume(25);
@@ -1489,6 +1531,8 @@
             this.handleSpawnCityTimeStep();
 
             this.handleBabyMonstersTimeStep()
+
+            this.m_timer.handleTimeStep();
         },
 
         //----------------------------------------------------------------------
@@ -1554,6 +1598,8 @@
             this.m_command_tray.paint();
 
             this.m_score.paint();
+
+            this.m_timer.paint();
         },
 
         //----------------------------------------------------------------------
